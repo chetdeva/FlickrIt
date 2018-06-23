@@ -2,6 +2,7 @@ package com.chetdeva.flickrit.search
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
@@ -11,6 +12,7 @@ import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.fueled.recyclerviewbindings.widget.scroll.RecyclerViewScrollCallback
 
@@ -20,6 +22,15 @@ class SearchFragment : Fragment(), SearchContract.View {
     private lateinit var results: RecyclerView
     private var searchView: SearchView? = null
     private lateinit var presenter: SearchContract.Presenter
+    private val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+            val viewType = adapter.getItemViewType(position)
+            return when (viewType) {
+                ProgressViewHolder.VIEW_TYPE -> MAX_GRID_SPAN_COUNT
+                else -> 1
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +47,9 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun setupList() {
-        val layoutManager = LinearLayoutManager(context)
+        val layoutManager = GridLayoutManager(context, MAX_GRID_SPAN_COUNT)
+        layoutManager.spanSizeLookup = spanSizeLookup
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
         results.layoutManager = layoutManager
         adapter = SearchResultsAdapter(presenter)
         results.adapter = adapter
@@ -144,5 +157,9 @@ class SearchFragment : Fragment(), SearchContract.View {
     override fun onDestroy() {
         super.onDestroy()
         onQueryTextListener = null
+    }
+
+    companion object {
+        private const val MAX_GRID_SPAN_COUNT = 3
     }
 }
