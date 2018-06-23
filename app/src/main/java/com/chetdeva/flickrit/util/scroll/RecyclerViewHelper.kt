@@ -1,4 +1,4 @@
-package com.fueled.recyclerviewbindings.widget.scroll
+package com.chetdeva.flickrit.util.scroll
 
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager

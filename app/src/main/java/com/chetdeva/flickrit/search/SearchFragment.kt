@@ -14,7 +14,7 @@ import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
-import com.fueled.recyclerviewbindings.widget.scroll.RecyclerViewScrollCallback
+import com.chetdeva.flickrit.util.scroll.RecyclerViewScrollCallback
 
 class SearchFragment : Fragment(), SearchContract.View {
 
