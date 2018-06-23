@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.*
 import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
+import com.chetdeva.flickrit.extensions.hideKeyboard
 import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
@@ -62,6 +63,7 @@ class SearchFragment : Fragment(), SearchContract.View {
             return
         }
         if (state.refresh) {
+            refreshAdapter()
             hideKeyboard()
         }
         if (state.photos.isNotEmpty()) {
@@ -72,7 +74,12 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
+    private fun refreshAdapter() {
+        results.post { adapter.clear() }
+    }
+
     private fun hideKeyboard() {
+        activity?.hideKeyboard()
     }
 
     private fun showLoading() {
@@ -80,14 +87,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun showResults(photos: List<PhotoDto>) {
-        results.post {
-            adapter.submitList(photos)
-            adapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun notifyAdapter() {
-        results.post { adapter.notifyDataSetChanged() }
+        results.post { adapter.addAll(photos) }
     }
 
     private fun showError(message: String) {

@@ -1,16 +1,15 @@
 package com.chetdeva.flickrit.search.adapter
 
-import android.support.v7.recyclerview.extensions.ListAdapter
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
-import com.chetdeva.flickrit.search.adapter.PhotoItemCallBack.Companion.PHOTO_DIFF_CALLBACK
 
 /**
  * @author chetansachdeva
@@ -18,23 +17,75 @@ import com.chetdeva.flickrit.search.adapter.PhotoItemCallBack.Companion.PHOTO_DI
 
 class SearchResultsAdapter(
         private val presenter: SearchContract.Adapter
-) : ListAdapter<PhotoDto, SearchResultsAdapter.ViewHolder>(PHOTO_DIFF_CALLBACK) {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    private val photos: MutableList<PhotoDto> = mutableListOf()
+
+    override fun getItemViewType(position: Int): Int {
+        return if (photos[position].id == "-1") ITEM_PROGRESS
+        else super.getItemViewType(position)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.item_search_result, parent, false)
-        return ViewHolder(view)
+        return if (viewType == ITEM_PROGRESS) {
+            val itemView = inflater.inflate(R.layout.item_progress, parent, false)
+            PhotoViewHolder(itemView)
+        } else {
+            val itemView = inflater.inflate(R.layout.item_search_result, parent, false)
+            return PhotoViewHolder(itemView)
+        }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder.itemViewType == ITEM_PROGRESS) {
+            (holder as ProgressViewHolder).bind(true)
+        } else {
+            (holder as PhotoViewHolder).bind(photos[position])
+        }
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    override fun getItemCount(): Int {
+        return photos.count()
+    }
 
-        private val ViewHolder.title: TextView
+    /**
+     * add photos of items and notify
+     */
+    fun addAll(users: List<PhotoDto>) {
+        photos.addAll(users)
+        notifyItemRangeChanged(users.size, photos.size - 1)
+    }
+
+    /**
+     * add an item and notify
+     */
+    fun add(user: PhotoDto) {
+        photos.add(user)
+        notifyItemInserted(photos.size - 1)
+    }
+
+    /**
+     * remove an item and notify
+     */
+    fun remove(position: Int) {
+        photos.removeAt(position)
+        notifyItemRemoved(photos.size)
+    }
+
+    /**
+     * clear all items and notify
+     */
+    fun clear() {
+        photos.clear()
+        notifyDataSetChanged()
+    }
+
+    inner class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+
+        private val title: TextView
             get() = itemView.findViewById(R.id.title)
-        private val ViewHolder.image: ImageView
+        private val image: ImageView
             get() = itemView.findViewById(R.id.image)
 
         init {
@@ -51,7 +102,23 @@ class SearchResultsAdapter(
         }
 
         override fun onClick(v: View?) {
-            presenter.onResultClicked(getItem(adapterPosition))
+            presenter.onResultClicked(photos[adapterPosition])
         }
+    }
+
+    /**
+     * Progress PhotoViewHolder
+     */
+    inner class ProgressViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val progressBar: ProgressBar
+            get() = itemView.findViewById(R.id.loader)
+
+        fun bind(isIndeterminate: Boolean) {
+            progressBar.isIndeterminate = isIndeterminate
+        }
+    }
+
+    companion object {
+        private val ITEM_PROGRESS = -1
     }
 }
