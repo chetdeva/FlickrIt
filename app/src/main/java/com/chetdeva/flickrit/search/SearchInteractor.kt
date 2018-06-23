@@ -41,7 +41,7 @@ class SearchInteractor(
                              publish: (SearchState) -> Unit) {
         Log.i("SearchInteractor", "searching flickr for query: $query page: $page")
 
-        lastQuery.lazySet(query)
+        lastQuery.set(query)
         inFlight.set(true)
         publish(SearchState(showLoader = true))
 
