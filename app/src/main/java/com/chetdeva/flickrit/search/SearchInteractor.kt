@@ -53,12 +53,16 @@ class SearchInteractor(
     }
 
     private fun onSuccess(response: SearchResponse, publish: (SearchState) -> Unit) {
-        val list = mapper.mapFromEntity(response).photos
-        photos.addAll(list)
-        val state = SearchState(hideLoader = true, photos = photos)
-        inFlight.set(false)
-        publish(state)
-        currentPage.incrementAndGet()
+        if (response.photos?.photo?.isNotEmpty() == true) {
+            val list = mapper.mapFromEntity(response).photos
+            photos.addAll(list)
+            val state = SearchState(hideLoader = true, photos = photos)
+            inFlight.set(false)
+            publish(state)
+            currentPage.incrementAndGet()
+        } else {
+            onError("No Items Found", publish)
+        }
     }
 
     private fun onError(error: String, publish: (SearchState) -> Unit) {

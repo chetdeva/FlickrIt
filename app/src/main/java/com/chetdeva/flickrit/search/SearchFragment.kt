@@ -14,6 +14,7 @@ import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
+import com.chetdeva.flickrit.util.mainThread
 import com.chetdeva.flickrit.util.scroll.RecyclerViewScrollCallback
 
 class SearchFragment : Fragment(), SearchContract.View {
@@ -76,12 +77,11 @@ class SearchFragment : Fragment(), SearchContract.View {
         presenter.search(query)
     }
 
-    override fun render(state: SearchState) {
+    override fun render(state: SearchState) = mainThread {
         Log.i("SearchFragment", "state: $state")
 
         if (state.error.isNotBlank()) {
             showError(state.error)
-            return
         }
         if (state.refresh) {
             clearSearchFocus()

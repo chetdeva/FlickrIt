@@ -16,13 +16,20 @@
 
 package com.chetdeva.flickrit.util
 
+import android.os.Handler
+import android.os.Looper
 import java.util.concurrent.Executors
 
 private val IO_EXECUTOR = Executors.newSingleThreadExecutor()
+private val handler = Handler(Looper.getMainLooper())
 
 /**
  * Utility method to run blocks on a dedicated background thread, used for io/database work.
  */
 fun ioThread(f : () -> Unit) {
     IO_EXECUTOR.execute(f)
+}
+
+fun mainThread(f : () -> Unit) {
+    handler.post(f)
 }
