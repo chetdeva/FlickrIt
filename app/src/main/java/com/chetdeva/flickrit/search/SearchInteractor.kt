@@ -25,8 +25,8 @@ class SearchInteractor(
     override fun search(query: String,
                         publish: (SearchState) -> Unit) {
 
-        if (query.isNotBlank() && query.length > 3) {
-            lastQuery = query
+        if (query.isNotBlank() && query.length >= 3) {
+            currentPage = 1
             photos.clear()
             publish(SearchState.Refresh)
             searchFlickr(query, currentPage, publish)
@@ -38,6 +38,7 @@ class SearchInteractor(
                              publish: (SearchState) -> Unit) {
         Log.i("SearchInteractor", "searching flickr for query: $query page: $page")
 
+        lastQuery = query
         inFlight = true
         publish(SearchState.Loading)
 

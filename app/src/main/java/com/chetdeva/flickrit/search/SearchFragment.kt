@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.*
 import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
+import com.chetdeva.flickrit.extensions.hideKeyboard
 import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
@@ -73,6 +74,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun hideKeyboard() {
+        activity?.hideKeyboard()
     }
 
     private fun showLoading() {
