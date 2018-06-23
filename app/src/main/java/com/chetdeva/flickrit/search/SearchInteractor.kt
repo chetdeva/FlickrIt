@@ -7,6 +7,9 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.network.dto.SearchResultDto
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.util.Mapper
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * @author chetansachdeva
@@ -17,19 +20,19 @@ class SearchInteractor(
         private val mapper: Mapper<SearchResponse, SearchResultDto>
 ) : SearchContract.Interactor {
 
-    private var currentPage: Int = 1
-    private var lastQuery: String = ""
-    private var inFlight: Boolean = false
+    private var currentPage: AtomicInteger = AtomicInteger(1)
+    private var lastQuery: AtomicReference<String> = AtomicReference("")
+    private var inFlight: AtomicBoolean = AtomicBoolean(false)
     private var photos: MutableList<PhotoDto> = mutableListOf()
 
     override fun search(query: String,
                         publish: (SearchState) -> Unit) {
 
         if (query.isNotBlank() && query.length >= 3) {
-            currentPage = 1
+            currentPage.set(1)
             photos.clear()
             publish(SearchState(refresh = true))
-            searchFlickr(query, currentPage, publish)
+            searchFlickr(query, currentPage.get(), publish)
         }
     }
 
@@ -38,8 +41,8 @@ class SearchInteractor(
                              publish: (SearchState) -> Unit) {
         Log.i("SearchInteractor", "searching flickr for query: $query page: $page")
 
-        lastQuery = query
-        inFlight = true
+        lastQuery.lazySet(query)
+        inFlight.set(true)
         publish(SearchState(showLoader = true))
 
         flickrApi.search(query, page, {
@@ -53,20 +56,20 @@ class SearchInteractor(
         val list = mapper.mapFromEntity(response).photos
         photos.addAll(list)
         val state = SearchState(hideLoader = true, photos = photos)
-        inFlight = false
+        inFlight.set(false)
         publish(state)
-        currentPage++
+        currentPage.incrementAndGet()
     }
 
     private fun onError(error: String, publish: (SearchState) -> Unit) {
         val state = SearchState(hideLoader = true, error = error)
-        inFlight = false
+        inFlight.set(false)
         publish(state)
     }
 
     override fun nextPage(publish: (SearchState) -> Unit) {
-        if (inFlight) return
-        searchFlickr(lastQuery, currentPage, publish)
+        if (inFlight.get()) return
+        searchFlickr(lastQuery.get(), currentPage.get(), publish)
     }
 
     override fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {

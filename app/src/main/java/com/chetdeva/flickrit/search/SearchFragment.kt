@@ -9,16 +9,16 @@ import android.util.Log
 import android.view.*
 import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
-import com.chetdeva.flickrit.extensions.hideKeyboard
 import com.chetdeva.flickrit.extensions.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
-import com.chetdeva.flickrit.util.InfiniteScrollListener
+import com.fueled.recyclerviewbindings.widget.scroll.RecyclerViewScrollCallback
 
 class SearchFragment : Fragment(), SearchContract.View {
 
     private lateinit var adapter: SearchResultsAdapter
     private lateinit var results: RecyclerView
+    private var searchView: SearchView? = null
     private lateinit var presenter: SearchContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,11 +40,18 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.layoutManager = layoutManager
         adapter = SearchResultsAdapter(presenter)
         results.adapter = adapter
-        results.addOnScrollListener(object : InfiniteScrollListener(layoutManager) {
-            override fun onLoadMore() {
-                presenter.loadNextPage()
-            }
+        results.addOnScrollListener(scrollCallback(layoutManager) {
+            presenter.loadNextPage()
         })
+    }
+
+    private fun scrollCallback(layoutManager: RecyclerView.LayoutManager,
+                               onScrolled: (Int) -> Unit): RecyclerViewScrollCallback {
+        return RecyclerViewScrollCallback.Builder(layoutManager)
+                .visibleThreshold(7)
+                .resetLoadingState(true)
+                .onScrolledListener(onScrolled)
+                .build()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -64,8 +71,8 @@ class SearchFragment : Fragment(), SearchContract.View {
             return
         }
         if (state.refresh) {
+            clearSearchFocus()
             refreshAdapter()
-            hideKeyboard()
         }
         if (state.showLoader) {
             showLoader()
@@ -78,12 +85,12 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
-    private fun refreshAdapter() {
-        results.post { adapter.clearNotify() }
+    private fun clearSearchFocus() {
+        searchView?.clearFocus()
     }
 
-    private fun hideKeyboard() {
-        activity?.hideKeyboard()
+    private fun refreshAdapter() {
+        results.post { adapter.clearNotify() }
     }
 
     private fun showLoader() {
@@ -117,7 +124,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater?.inflate(R.menu.menu_search, menu)
-        val searchView = searchView(menu)
+        searchView = searchView(menu)
         searchView?.queryHint = context?.getString(R.string.search)
         searchView?.setOnQueryTextListener(onQueryTextListener)
     }

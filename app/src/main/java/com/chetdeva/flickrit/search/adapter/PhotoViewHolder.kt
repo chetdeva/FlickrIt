@@ -12,7 +12,7 @@ import com.chetdeva.flickrit.search.SearchContract
 
 class PhotoViewHolder(
         itemView: View,
-        private val presenter: SearchContract.Adapter
+        private val adapter: SearchContract.Adapter
 ) : RecyclerView.ViewHolder(itemView) {
 
     private val title: TextView
@@ -23,13 +23,13 @@ class PhotoViewHolder(
     fun bind(photo: PhotoDto) {
         title.text = photo.title
         image.setImageBitmap(null)
-        presenter.downloadImage(photo.url) {
+        adapter.downloadImage(photo.url) {
             image.setImageBitmap(null)
             image.setImageBitmap(it)
         }
 
         itemView.setOnClickListener {
-            presenter.onResultClicked(photo)
+            adapter.onResultClicked(photo)
         }
     }
 

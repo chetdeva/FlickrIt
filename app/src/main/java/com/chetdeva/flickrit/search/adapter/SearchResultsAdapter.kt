@@ -10,7 +10,7 @@ import com.chetdeva.flickrit.search.SearchContract
  */
 
 class SearchResultsAdapter(
-        private val presenter: SearchContract.Adapter
+        private val adapter: SearchContract.Adapter
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Notifiable<PhotoDto?>, Loadable {
 
     private val photos: MutableList<PhotoDto?> = mutableListOf()
@@ -27,7 +27,7 @@ class SearchResultsAdapter(
         return if (viewType == ProgressViewHolder.VIEW_TYPE) {
             ProgressViewHolder.create(parent)
         } else {
-            PhotoViewHolder.create(parent, presenter)
+            PhotoViewHolder.create(parent, adapter)
         }
     }
 
