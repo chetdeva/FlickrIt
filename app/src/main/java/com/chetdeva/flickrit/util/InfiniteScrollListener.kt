@@ -28,7 +28,7 @@ abstract class InfiniteScrollListener(
     private val loadMoreRunnable = Runnable { onLoadMore() }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        // bail out if scrolling upward or already loading data
+        // bail out if scrolling upward or already showLoader data
         if (dy < 0) return
 
         val visibleItemCount = recyclerView.childCount
@@ -43,7 +43,7 @@ abstract class InfiniteScrollListener(
     abstract fun onLoadMore()
 
     companion object {
-        // The minimum number of items remaining before we should loading more.
+        // The minimum number of items remaining before we should showLoader more.
         private const val VISIBLE_THRESHOLD = 5
     }
 }

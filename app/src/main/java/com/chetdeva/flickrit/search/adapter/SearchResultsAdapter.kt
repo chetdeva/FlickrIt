@@ -1,13 +1,7 @@
 package com.chetdeva.flickrit.search.adapter
 
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
 
@@ -17,31 +11,31 @@ import com.chetdeva.flickrit.search.SearchContract
 
 class SearchResultsAdapter(
         private val presenter: SearchContract.Adapter
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Notifiable<PhotoDto?>, Loadable {
 
-    private val photos: MutableList<PhotoDto> = mutableListOf()
+    private val photos: MutableList<PhotoDto?> = mutableListOf()
 
     override fun getItemViewType(position: Int): Int {
-        return if (photos[position].id == "-1") ITEM_PROGRESS
-        else super.getItemViewType(position)
+        return if (photos[position] == null) {
+            ProgressViewHolder.VIEW_TYPE
+        } else {
+            super.getItemViewType(position)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        return if (viewType == ITEM_PROGRESS) {
-            val itemView = inflater.inflate(R.layout.item_progress, parent, false)
-            PhotoViewHolder(itemView)
+        return if (viewType == ProgressViewHolder.VIEW_TYPE) {
+            ProgressViewHolder.create(parent)
         } else {
-            val itemView = inflater.inflate(R.layout.item_search_result, parent, false)
-            return PhotoViewHolder(itemView)
+            PhotoViewHolder.create(parent, presenter)
         }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder.itemViewType == ITEM_PROGRESS) {
+        if (holder.itemViewType == ProgressViewHolder.VIEW_TYPE) {
             (holder as ProgressViewHolder).bind(true)
         } else {
-            (holder as PhotoViewHolder).bind(photos[position])
+            (holder as PhotoViewHolder).bind(photos[position]!!)
         }
     }
 
@@ -49,76 +43,33 @@ class SearchResultsAdapter(
         return photos.count()
     }
 
-    /**
-     * add photos of items and notify
-     */
-    fun addAll(users: List<PhotoDto>) {
-        photos.addAll(users)
-        notifyItemRangeChanged(users.size, photos.size - 1)
+    override fun addAllNotify(list: List<PhotoDto?>) {
+        this.photos.addAll(list)
+        notifyItemRangeChanged(list.size, this.photos.size - 1)
     }
 
-    /**
-     * add an item and notify
-     */
-    fun add(user: PhotoDto) {
-        photos.add(user)
+    override fun addNotify(item: PhotoDto?) {
+        photos.add(item)
         notifyItemInserted(photos.size - 1)
     }
 
-    /**
-     * remove an item and notify
-     */
-    fun remove(position: Int) {
+    override fun removeNotify(position: Int) {
         photos.removeAt(position)
         notifyItemRemoved(photos.size)
     }
 
-    /**
-     * clear all items and notify
-     */
-    fun clear() {
+    override fun clearNotify() {
         photos.clear()
         notifyDataSetChanged()
     }
 
-    inner class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-
-        private val title: TextView
-            get() = itemView.findViewById(R.id.title)
-        private val image: ImageView
-            get() = itemView.findViewById(R.id.image)
-
-        init {
-            itemView.setOnClickListener(this)
-        }
-
-        fun bind(photo: PhotoDto) {
-            title.text = photo.title
-            image.setImageBitmap(null)
-            presenter.downloadImage(photo.url) {
-                image.setImageBitmap(null)
-                image.setImageBitmap(it)
-            }
-        }
-
-        override fun onClick(v: View?) {
-            presenter.onResultClicked(photos[adapterPosition])
-        }
+    override fun addLoaderAtBottom() {
+        addNotify(null)
     }
 
-    /**
-     * Progress PhotoViewHolder
-     */
-    inner class ProgressViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val progressBar: ProgressBar
-            get() = itemView.findViewById(R.id.loader)
-
-        fun bind(isIndeterminate: Boolean) {
-            progressBar.isIndeterminate = isIndeterminate
+    override fun removeLoaderFromBottom() {
+        if (photos.size > 0 && photos[photos.size - 1] == null) {
+            removeNotify(photos.size - 1)
         }
-    }
-
-    companion object {
-        private val ITEM_PROGRESS = -1
     }
 }

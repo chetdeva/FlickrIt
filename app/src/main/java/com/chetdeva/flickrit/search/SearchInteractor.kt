@@ -28,7 +28,7 @@ class SearchInteractor(
         if (query.isNotBlank() && query.length >= 3) {
             currentPage = 1
             photos.clear()
-            publish(SearchState.Refresh)
+            publish(SearchState(refresh = true))
             searchFlickr(query, currentPage, publish)
         }
     }
@@ -40,7 +40,7 @@ class SearchInteractor(
 
         lastQuery = query
         inFlight = true
-        publish(SearchState.Loading)
+        publish(SearchState(showLoader = true))
 
         flickrApi.search(query, page, {
             onSuccess(it, publish)
@@ -52,14 +52,14 @@ class SearchInteractor(
     private fun onSuccess(response: SearchResponse, publish: (SearchState) -> Unit) {
         val list = mapper.mapFromEntity(response).photos
         photos.addAll(list)
-        val state = SearchState(loading = false, photos = photos)
+        val state = SearchState(hideLoader = true, photos = photos)
         inFlight = false
         publish(state)
         currentPage++
     }
 
     private fun onError(error: String, publish: (SearchState) -> Unit) {
-        val state = SearchState(error = error)
+        val state = SearchState(hideLoader = true, error = error)
         inFlight = false
         publish(state)
     }

@@ -58,6 +58,7 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun render(state: SearchState) {
         Log.i("SearchFragment", "state: $state")
+
         if (state.error.isNotBlank()) {
             showError(state.error)
             return
@@ -66,28 +67,35 @@ class SearchFragment : Fragment(), SearchContract.View {
             refreshAdapter()
             hideKeyboard()
         }
+        if (state.showLoader) {
+            showLoader()
+        }
+        if (state.hideLoader) {
+            hideLoader()
+        }
         if (state.photos.isNotEmpty()) {
             showResults(state.photos)
-        }
-        if (state.loading) {
-            showLoading()
         }
     }
 
     private fun refreshAdapter() {
-        results.post { adapter.clear() }
+        results.post { adapter.clearNotify() }
     }
 
     private fun hideKeyboard() {
         activity?.hideKeyboard()
     }
 
-    private fun showLoading() {
+    private fun showLoader() {
+        results.post { adapter.addLoaderAtBottom() }
+    }
 
+    private fun hideLoader() {
+        results.post { adapter.removeLoaderFromBottom() }
     }
 
     private fun showResults(photos: List<PhotoDto>) {
-        results.post { adapter.addAll(photos) }
+        results.post { adapter.addAllNotify(photos) }
     }
 
     private fun showError(message: String) {
