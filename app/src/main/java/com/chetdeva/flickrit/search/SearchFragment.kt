@@ -109,7 +109,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         Log.i("SearchFragment", "state: $state")
 
         if (state.error.isNotBlank()) {
-            hideScreenLoader()
+            hideScreenLoaderIfShown()
             showError(state.error)
         }
         if (state.showLoader) {
@@ -118,12 +118,12 @@ class SearchFragment : Fragment(), SearchContract.View {
                 clearList()
                 showScreenLoader()
             } else {
-                showListLoader(state.photos)
+                showLoaderAndUpdate(state.photos)
             }
         }
         if (state.hideLoader) {
-            hideScreenLoader()
-            hideListLoader(state.photos)
+            hideScreenLoaderIfShown()
+            hideLoaderAndUpdate(state.photos)
         }
     }
 
@@ -131,8 +131,8 @@ class SearchFragment : Fragment(), SearchContract.View {
         loader.visible()
     }
 
-    private fun hideScreenLoader() {
-        if (loader.isVisible()) {
+    private fun hideScreenLoaderIfShown() {
+        if (loader.isVisible) {
             loader.gone()
         }
     }
@@ -145,7 +145,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         showList(emptyList())
     }
 
-    private fun showListLoader(photos: List<PhotoDto?>) {
+    private fun showLoaderAndUpdate(photos: List<PhotoDto?>) {
         val list = photos.toMutableList()
         list.add(null)
         showList(list)
@@ -155,7 +155,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.post { adapter.submitList(list) }
     }
 
-    private fun hideListLoader(photos: List<PhotoDto?>) {
+    private fun hideLoaderAndUpdate(photos: List<PhotoDto?>) {
         showList(photos)
     }
 

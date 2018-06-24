@@ -6,9 +6,8 @@ import android.view.View
  * @author chetansachdeva
  */
 
-fun View.isVisible(): Boolean {
-    return visibility == View.VISIBLE
-}
+val View.isVisible: Boolean
+    get() = visibility == View.VISIBLE
 
 fun View.visible() {
     visibility = View.VISIBLE

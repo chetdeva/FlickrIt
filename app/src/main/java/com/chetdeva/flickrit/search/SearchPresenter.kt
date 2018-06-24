@@ -15,11 +15,23 @@ class SearchPresenter(
 ) : SearchContract.Presenter {
 
     override fun search(query: String) {
-        interactor.search(query, view::render)
+        interactor.search(query) {
+            view.render(searchState(it))
+        }
     }
 
     override fun loadNextPage() {
-        interactor.nextPage(view::render)
+        interactor.nextPage {
+            view.render(searchState(it))
+        }
+    }
+
+    private fun searchState(model: SearchModel): SearchState {
+        return SearchState(
+                showLoader = model.loading,
+                hideLoader = !model.loading,
+                photos = model.photos,
+                error = model.error)
     }
 
     override fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
