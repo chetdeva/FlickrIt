@@ -1,57 +1,54 @@
 package com.chetdeva.flickrit.search.adapter
 
 import android.support.v7.recyclerview.extensions.ListAdapter
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
-import com.chetdeva.flickrit.search.adapter.PhotoItemCallBack.Companion.PHOTO_DIFF_CALLBACK
 
 /**
  * @author chetansachdeva
  */
 
 class SearchResultsAdapter(
-        private val presenter: SearchContract.Adapter
-) : ListAdapter<PhotoDto, SearchResultsAdapter.ViewHolder>(PHOTO_DIFF_CALLBACK) {
+        private val adapter: SearchContract.Adapter
+) : ListAdapter<PhotoDto?, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.item_search_result, parent, false)
-        return ViewHolder(view)
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
-    }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-
-        private val ViewHolder.title: TextView
-            get() = itemView.findViewById(R.id.title)
-        private val ViewHolder.image: ImageView
-            get() = itemView.findViewById(R.id.image)
-
-        init {
-            itemView.setOnClickListener(this)
+    override fun getItemViewType(position: Int): Int {
+        return if (null == getItem(position)) {
+            ProgressViewHolder.VIEW_TYPE
+        } else {
+            super.getItemViewType(position)
         }
+    }
 
-        fun bind(photo: PhotoDto) {
-            title.text = photo.title
-            image.setImageBitmap(null)
-            presenter.downloadImage(photo.url) {
-                image.setImageBitmap(null)
-                image.setImageBitmap(it)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == ProgressViewHolder.VIEW_TYPE) {
+            ProgressViewHolder.create(parent)
+        } else {
+            PhotoViewHolder.create(parent, adapter)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder.itemViewType == ProgressViewHolder.VIEW_TYPE) {
+            (holder as ProgressViewHolder).bind(true)
+        } else {
+            (holder as PhotoViewHolder).bind(getItem(position)!!)
+        }
+    }
+
+    companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PhotoDto?>() {
+
+            override fun areItemsTheSame(oldItem: PhotoDto?, newItem: PhotoDto?): Boolean {
+                return oldItem?.id == newItem?.id
             }
-        }
 
-        override fun onClick(v: View?) {
-            presenter.onResultClicked(getItem(adapterPosition))
+            override fun areContentsTheSame(oldItem: PhotoDto?, newItem: PhotoDto?): Boolean {
+                return oldItem == newItem
+            }
         }
     }
 }

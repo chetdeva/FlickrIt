@@ -2,96 +2,43 @@ package com.chetdeva.flickrit.search
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.*
+import android.widget.ProgressBar
 import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
-import com.chetdeva.flickrit.extensions.showToast
+import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
+import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
-import com.chetdeva.flickrit.util.InfiniteScrollListener
+import com.chetdeva.flickrit.util.extension.gone
+import com.chetdeva.flickrit.util.extension.isVisible
+import com.chetdeva.flickrit.util.extension.visible
+import com.chetdeva.flickrit.util.mainThread
+import com.chetdeva.flickrit.util.scroll.RecyclerViewScrollCallback
+
 
 class SearchFragment : Fragment(), SearchContract.View {
 
     private lateinit var adapter: SearchResultsAdapter
     private lateinit var results: RecyclerView
+    private lateinit var loader: ProgressBar
+    private var searchView: SearchView? = null
     private lateinit var presenter: SearchContract.Presenter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-        presenter = SearchPresenter(Injector.provideSearchInteractor(), this)
-    }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_search, container, false)
-        results = view.findViewById(R.id.results)
-        setupList()
-        return view
-    }
-
-    private fun setupList() {
-        val layoutManager = LinearLayoutManager(context)
-        results.layoutManager = layoutManager
-        adapter = SearchResultsAdapter(presenter)
-        results.adapter = adapter
-        results.addOnScrollListener(object : InfiniteScrollListener(layoutManager) {
-            override fun onLoadMore() {
-                presenter.loadNextPage()
+    private val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+        override fun getSpanSize(position: Int): Int {
+            val viewType = adapter.getItemViewType(position)
+            return when (viewType) {
+                ProgressViewHolder.VIEW_TYPE -> MAX_GRID_SPAN_COUNT
+                else -> 1
             }
-        })
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        search("kittens")
-    }
-
-    private fun search(query: String) {
-        presenter.search(query)
-    }
-
-    override fun render(state: SearchState) {
-        Log.i("SearchFragment", "state: $state")
-        if (state.error.isNotBlank()) {
-            showError(state.error)
-            return
         }
-        if (state.refresh) {
-            hideKeyboard()
-        }
-        if (state.photos.isNotEmpty()) {
-            showResults(state.photos)
-        }
-        if (state.loading) {
-            showLoading()
-        }
-    }
-
-    private fun hideKeyboard() {
-    }
-
-    private fun showLoading() {
-
-    }
-
-    private fun showResults(photos: List<PhotoDto>) {
-        results.post {
-            adapter.submitList(photos)
-            adapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun notifyAdapter() {
-        results.post { adapter.notifyDataSetChanged() }
-    }
-
-    private fun showError(message: String) {
-        activity?.showToast(message)
     }
 
     private var onQueryTextListener: SearchView.OnQueryTextListener? = object : SearchView.OnQueryTextListener {
@@ -106,10 +53,120 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+        injectDependencies()
+    }
+
+    private fun injectDependencies() {
+        val interactor = Injector.provideSearchInteractor()
+        val imageClient = Injector.provideImageClient()
+        presenter = SearchPresenter(interactor, imageClient, this)
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val view = inflater.inflate(R.layout.fragment_search, container, false)
+        results = view.findViewById(R.id.results)
+        loader = view.findViewById(R.id.loader)
+        setupList()
+        return view
+    }
+
+    private fun setupList() {
+        val layoutManager = GridLayoutManager(context, MAX_GRID_SPAN_COUNT)
+        layoutManager.spanSizeLookup = spanSizeLookup
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        results.layoutManager = layoutManager
+        results.setHasFixedSize(true)
+        adapter = SearchResultsAdapter(presenter)
+        results.adapter = adapter
+        results.addOnScrollListener(scrollCallback(layoutManager) {
+            presenter.loadNextPage()
+        })
+    }
+
+    private fun scrollCallback(layoutManager: RecyclerView.LayoutManager,
+                               onScrolled: (Int) -> Unit): RecyclerViewScrollCallback {
+        return RecyclerViewScrollCallback.Builder(layoutManager)
+                .visibleThreshold(VISIBLE_THRESHOLD)
+                .resetLoadingState(true)
+                .onScrolledListener(onScrolled)
+                .build()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        search("kittens")
+    }
+
+    private fun search(query: String) {
+        presenter.search(query)
+    }
+
+    override fun render(state: SearchState) = mainThread {
+        Log.i("SearchFragment", "state: $state")
+
+        if (state.error.isNotBlank()) {
+            hideScreenLoaderIfShown()
+            showError(state.error)
+        }
+        if (state.showLoader) {
+            if (state.photos.isEmpty()) {
+                clearSearchFocus()
+                clearList()
+                showScreenLoader()
+            } else {
+                showLoaderAndUpdate(state.photos)
+            }
+        }
+        if (state.hideLoader) {
+            hideScreenLoaderIfShown()
+            hideLoaderAndUpdate(state.photos)
+        }
+    }
+
+    private fun showScreenLoader() {
+        loader.visible()
+    }
+
+    private fun hideScreenLoaderIfShown() {
+        if (loader.isVisible) {
+            loader.gone()
+        }
+    }
+
+    private fun clearSearchFocus() {
+        searchView?.clearFocus()
+    }
+
+    private fun clearList() {
+        showList(emptyList())
+    }
+
+    private fun showLoaderAndUpdate(photos: List<PhotoDto?>) {
+        val list = photos.toMutableList()
+        list.add(null)
+        showList(list)
+    }
+
+    private fun showList(list: List<PhotoDto?>) {
+        results.post { adapter.submitList(list) }
+    }
+
+    private fun hideLoaderAndUpdate(photos: List<PhotoDto?>) {
+        showList(photos)
+    }
+
+    private fun showError(message: String) {
+        activity?.showToast(message)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater?.inflate(R.menu.menu_search, menu)
-        val searchView = searchView(menu)
+        searchView = searchView(menu)
         searchView?.queryHint = context?.getString(R.string.search)
         searchView?.setOnQueryTextListener(onQueryTextListener)
     }
@@ -129,5 +186,9 @@ class SearchFragment : Fragment(), SearchContract.View {
     override fun onDestroy() {
         super.onDestroy()
         onQueryTextListener = null
+    }
+
+    companion object {
+        private const val MAX_GRID_SPAN_COUNT = 3
     }
 }

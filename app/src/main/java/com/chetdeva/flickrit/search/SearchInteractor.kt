@@ -1,7 +1,5 @@
 package com.chetdeva.flickrit.search
 
-import android.graphics.Bitmap
-import android.util.Log
 import com.chetdeva.flickrit.network.FlickrApiService
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.network.dto.SearchResultDto
@@ -14,65 +12,60 @@ import com.chetdeva.flickrit.util.Mapper
 
 class SearchInteractor(
         private val flickrApi: FlickrApiService,
-        private val mapper: Mapper<SearchResponse, SearchResultDto>
+        private val searchMapper: Mapper<SearchResponse, SearchResultDto>
 ) : SearchContract.Interactor {
 
-    private var currentPage: Int = 1
-    private var lastQuery: String = ""
-    private var inFlight: Boolean = false
-    private var photos: MutableList<PhotoDto> = mutableListOf()
+    private var model: SearchModel = SearchModel.Init
 
     override fun search(query: String,
-                        publish: (SearchState) -> Unit) {
+                        publish: (SearchModel) -> Unit) {
 
-        if (query.isNotBlank() && query.length > 3) {
-            lastQuery = query
-            photos.clear()
-            publish(SearchState.Refresh)
-            searchFlickr(query, currentPage, publish)
+        if (query.isNotBlank() && query.length >= 3) {
+            model = model.copy(loading = true, photos = emptyList(), query = query, page = 1)
+            publish(model)
+            searchFlickr(query, model.page, publish)
         }
     }
 
     private fun searchFlickr(query: String,
                              page: Int,
-                             publish: (SearchState) -> Unit) {
-        Log.i("SearchInteractor", "searching flickr for query: $query page: $page")
-
-        inFlight = true
-        publish(SearchState.Loading)
+                             publish: (SearchModel) -> Unit) {
 
         flickrApi.search(query, page, {
-            onSuccess(it, publish)
+            onSearchSuccess(it, publish)
         }, {
-            onError(it, publish)
+            onSearchError(it, publish)
         })
     }
 
-    private fun onSuccess(response: SearchResponse, publish: (SearchState) -> Unit) {
-        val list = mapper.mapFromEntity(response).photos
-        photos.addAll(list)
-        val state = SearchState(loading = false, photos = photos)
-        inFlight = false
-        publish(state)
-        currentPage++
+    private fun onSearchSuccess(response: SearchResponse, publish: (SearchModel) -> Unit) {
+        if (response.photos?.photo?.isNotEmpty() == true) {
+            val photos = updateList(searchMapper.mapFromEntity(response).photos)
+            model = model.copy(loading = false, photos = photos, page = model.page + 1)
+            publish(model)
+        } else {
+            onSearchError("No Items Found", publish)
+        }
     }
 
-    private fun onError(error: String, publish: (SearchState) -> Unit) {
-        val state = SearchState(error = error)
-        inFlight = false
-        publish(state)
+    private fun updateList(photos: List<PhotoDto>): MutableList<PhotoDto> {
+        return model.photos.toMutableList().apply { addAll(photos) }
     }
 
-    override fun nextPage(publish: (SearchState) -> Unit) {
-        if (inFlight) return
-        searchFlickr(lastQuery, currentPage, publish)
+    private fun onSearchError(error: String, publish: (SearchModel) -> Unit) {
+        model = model.copy(loading = false, error = error)
+        publish(model)
     }
 
-    override fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
-        return flickrApi.downloadImage(url, onDownloadComplete)
+    override fun nextPage(publish: (SearchModel) -> Unit) {
+        if (model.loading) return
+        model = model.copy(loading = true)
+        publish(model)
+        searchFlickr(model.query, model.page, publish)
     }
 
     companion object {
-        const val MAX_PAGE_SIZE: Int = 10
+        const val VISIBLE_THRESHOLD: Int = 9
+        const val MAX_PAGE_SIZE: Int = 12
     }
 }

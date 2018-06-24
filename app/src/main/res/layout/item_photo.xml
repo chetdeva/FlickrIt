@@ -5,20 +5,24 @@
     android:layout_height="wrap_content"
     android:background="@android:color/white"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="4dp">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="3"
+        android:minLines="3"
         android:textColor="@android:color/black"
-        tools:text="title" />
+        tools:text="Title" />
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginTop="8dp"
-        android:contentDescription="image" />
+        android:contentDescription="image"
+        android:scaleType="centerCrop" />
 
 </LinearLayout>
