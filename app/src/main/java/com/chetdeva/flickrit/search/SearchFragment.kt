@@ -105,7 +105,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         presenter.search(query)
     }
 
-    override fun render(state: SearchViewState) = mainThread {
+    override fun render(state: SearchState) = mainThread {
         Log.i("SearchFragment", "state: $state")
 
         if (state.error.isNotBlank()) {

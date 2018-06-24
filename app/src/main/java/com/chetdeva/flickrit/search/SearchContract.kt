@@ -10,7 +10,7 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
 interface SearchContract {
 
     interface View {
-        fun render(state: SearchViewState)
+        fun render(state: SearchState)
     }
 
     interface Presenter : Adapter {
@@ -19,8 +19,8 @@ interface SearchContract {
     }
 
     interface Interactor {
-        fun search(query: String, publish: (SearchViewState) -> Unit)
-        fun nextPage(publish: (SearchViewState) -> Unit)
+        fun search(query: String, publish: (SearchState) -> Unit)
+        fun nextPage(publish: (SearchState) -> Unit)
     }
 
     interface Adapter {
