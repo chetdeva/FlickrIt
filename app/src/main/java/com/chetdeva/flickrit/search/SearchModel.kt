@@ -17,3 +17,12 @@ data class SearchModel(
         val Init = SearchModel()
     }
 }
+
+fun SearchModel.state(): SearchState {
+    return SearchState(
+            showLoader = loading,
+            hideLoader = !loading,
+            photos = photos,
+            error = error)
+}
+
