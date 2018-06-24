@@ -13,7 +13,7 @@ import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
-import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBILE_THRESHOLD
+import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.chetdeva.flickrit.util.extension.gone
@@ -90,7 +90,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     private fun scrollCallback(layoutManager: RecyclerView.LayoutManager,
                                onScrolled: (Int) -> Unit): RecyclerViewScrollCallback {
         return RecyclerViewScrollCallback.Builder(layoutManager)
-                .visibleThreshold(VISIBILE_THRESHOLD)
+                .visibleThreshold(VISIBLE_THRESHOLD)
                 .resetLoadingState(true)
                 .onScrolledListener(onScrolled)
                 .build()
