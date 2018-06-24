@@ -1,13 +1,11 @@
 package com.chetdeva.flickrit.network
 
-import android.graphics.Bitmap
 import com.chetdeva.flickrit.BuildConfig
 import com.chetdeva.flickrit.util.extension.fromJson
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.search.SearchInteractor
-import com.chetdeva.flickrit.util.image.DownloadImageTask
 import com.chetdeva.flickrit.util.ioThread
-import com.example.android.architecture.blueprints.todoapp.util.SingletonHolderDoubleArg
+import com.chetdeva.flickrit.util.SingletonHolderDoubleArg
 import com.google.gson.Gson
 import java.util.*
 

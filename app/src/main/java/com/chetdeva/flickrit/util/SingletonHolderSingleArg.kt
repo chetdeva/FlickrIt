@@ -1,4 +1,4 @@
-package com.example.android.architecture.blueprints.todoapp.util
+package com.chetdeva.flickrit.util
 
 /**
  * Used to allow Singleton with arguments in Kotlin while keeping the code efficient and safe.

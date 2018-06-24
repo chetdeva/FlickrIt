@@ -1,6 +1,6 @@
 package com.chetdeva.flickrit.network
 
-import com.example.android.architecture.blueprints.todoapp.util.SingletonHolderSingleArg
+import com.chetdeva.flickrit.util.SingletonHolderSingleArg
 import okhttp3.*
 import java.io.IOException
 
