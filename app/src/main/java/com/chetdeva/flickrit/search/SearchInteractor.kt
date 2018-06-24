@@ -1,6 +1,5 @@
 package com.chetdeva.flickrit.search
 
-import android.graphics.Bitmap
 import android.util.Log
 import com.chetdeva.flickrit.network.FlickrApiService
 import com.chetdeva.flickrit.network.dto.PhotoDto
@@ -26,24 +25,24 @@ class SearchInteractor(
     private var photos: MutableList<PhotoDto> = mutableListOf()
 
     override fun search(query: String,
-                        publish: (SearchState) -> Unit) {
+                        publish: (SearchViewState) -> Unit) {
 
         if (query.isNotBlank() && query.length >= 3) {
             currentPage.set(1)
             photos.clear()
-            publish(SearchState(refresh = true))
+            publish(SearchViewState.Init)
             searchFlickr(query, currentPage.get(), publish)
         }
     }
 
     private fun searchFlickr(query: String,
                              page: Int,
-                             publish: (SearchState) -> Unit) {
+                             publish: (SearchViewState) -> Unit) {
         Log.i("SearchInteractor", "searching flickr for query: $query page: $page")
 
         lastQuery.set(query)
         inFlight.set(true)
-        publish(SearchState(showLoader = true))
+        publish(SearchViewState(showLoader = true, photos = photos))
 
         flickrApi.search(query, page, {
             onSuccess(it, publish)
@@ -52,11 +51,11 @@ class SearchInteractor(
         })
     }
 
-    private fun onSuccess(response: SearchResponse, publish: (SearchState) -> Unit) {
+    private fun onSuccess(response: SearchResponse, publish: (SearchViewState) -> Unit) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val list = mapper.mapFromEntity(response).photos
             photos.addAll(list)
-            val state = SearchState(hideLoader = true, photos = photos)
+            val state = SearchViewState(hideLoader = true, photos = photos)
             inFlight.set(false)
             publish(state)
             currentPage.incrementAndGet()
@@ -65,22 +64,19 @@ class SearchInteractor(
         }
     }
 
-    private fun onError(error: String, publish: (SearchState) -> Unit) {
-        val state = SearchState(hideLoader = true, error = error)
+    private fun onError(error: String, publish: (SearchViewState) -> Unit) {
+        val state = SearchViewState(hideLoader = true, photos = photos, error = error)
         inFlight.set(false)
         publish(state)
     }
 
-    override fun nextPage(publish: (SearchState) -> Unit) {
+    override fun nextPage(publish: (SearchViewState) -> Unit) {
         if (inFlight.get()) return
         searchFlickr(lastQuery.get(), currentPage.get(), publish)
     }
 
-    override fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
-        return flickrApi.downloadImage(url, onDownloadComplete)
-    }
-
     companion object {
-        const val MAX_PAGE_SIZE: Int = 10
+        const val VISIBILE_THRESHOLD: Int = 9
+        const val MAX_PAGE_SIZE: Int = 12
     }
 }

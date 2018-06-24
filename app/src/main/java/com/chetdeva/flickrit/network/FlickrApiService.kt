@@ -2,7 +2,7 @@ package com.chetdeva.flickrit.network
 
 import android.graphics.Bitmap
 import com.chetdeva.flickrit.BuildConfig
-import com.chetdeva.flickrit.extensions.fromJson
+import com.chetdeva.flickrit.util.extension.fromJson
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.search.SearchInteractor
 import com.chetdeva.flickrit.util.image.DownloadImageTask
@@ -35,10 +35,6 @@ class FlickrApiService(private val apiClient: ApiClient,
         apiClient.asyncRequest(request, {
             onSuccess(gson.fromJson(it.string()))
         }, onError)
-    }
-
-    fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
-        DownloadImageTask(apiClient, onDownloadComplete).execute(url)
     }
 
     companion object : SingletonHolderDoubleArg<FlickrApiService, ApiClient, Gson>(::FlickrApiService) {

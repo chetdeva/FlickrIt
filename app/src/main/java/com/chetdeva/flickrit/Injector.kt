@@ -2,6 +2,7 @@ package com.chetdeva.flickrit
 
 import com.chetdeva.flickrit.network.FlickrApiService
 import com.chetdeva.flickrit.network.ApiClient
+import com.chetdeva.flickrit.network.ImageClient
 import com.chetdeva.flickrit.network.mapper.SearchMapper
 import com.chetdeva.flickrit.search.SearchContract
 import com.chetdeva.flickrit.search.SearchInteractor
@@ -23,15 +24,19 @@ object Injector {
     private val gson by lazy { GsonBuilder().create() }
     private val searchMapper by lazy { SearchMapper() }
 
+    fun provideImageClient(): ImageClient {
+        return ImageClient(provideApiClient(okHttpClient))
+    }
+
     fun provideSearchInteractor(): SearchContract.Interactor {
         return SearchInteractor(provideFlickrApiService(okHttpClient, gson), searchMapper)
     }
 
     private fun provideFlickrApiService(client: OkHttpClient, gson: Gson): FlickrApiService {
-        return FlickrApiService.getInstance(provideHttpManager(client), gson)
+        return FlickrApiService.getInstance(provideApiClient(client), gson)
     }
 
-    private fun provideHttpManager(client: OkHttpClient): ApiClient {
+    private fun provideApiClient(client: OkHttpClient): ApiClient {
         return ApiClient.getInstance(client)
     }
 

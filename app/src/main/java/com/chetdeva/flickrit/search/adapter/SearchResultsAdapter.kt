@@ -16,7 +16,7 @@ class SearchResultsAdapter(
 ) : ListAdapter<PhotoDto?, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
 
     override fun getItemViewType(position: Int): Int {
-        return if (getItem(position) == null) {
+        return if (null == getItem(position)) {
             ProgressViewHolder.VIEW_TYPE
         } else {
             super.getItemViewType(position)

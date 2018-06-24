@@ -1,4 +1,4 @@
-package com.chetdeva.flickrit.extensions
+package com.chetdeva.flickrit.util.extension
 
 import android.app.Activity
 import android.support.annotation.StringRes

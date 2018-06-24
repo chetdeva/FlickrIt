@@ -1,4 +1,4 @@
-package com.chetdeva.flickrit.extensions
+package com.chetdeva.flickrit.util.extension
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

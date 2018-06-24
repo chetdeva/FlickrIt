@@ -2,8 +2,6 @@ package com.chetdeva.flickrit.search
 
 import android.graphics.Bitmap
 import com.chetdeva.flickrit.network.dto.PhotoDto
-import com.chetdeva.flickrit.network.dto.SearchResultDto
-import java.util.*
 
 /**
  * @author chetansachdeva
@@ -12,7 +10,7 @@ import java.util.*
 interface SearchContract {
 
     interface View {
-        fun render(state: SearchState)
+        fun render(state: SearchViewState)
     }
 
     interface Presenter : Adapter {
@@ -21,9 +19,8 @@ interface SearchContract {
     }
 
     interface Interactor {
-        fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit)
-        fun search(query: String, publish: (SearchState) -> Unit)
-        fun nextPage(publish: (SearchState) -> Unit)
+        fun search(query: String, publish: (SearchViewState) -> Unit)
+        fun nextPage(publish: (SearchViewState) -> Unit)
     }
 
     interface Adapter {
