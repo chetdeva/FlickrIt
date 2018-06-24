@@ -103,7 +103,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun refreshAdapter() {
-        results.post { adapter.notifyDataSetChanged() }
+        results.post { adapter.submitList(emptyList()) }
     }
 
     private fun showLoader() {
