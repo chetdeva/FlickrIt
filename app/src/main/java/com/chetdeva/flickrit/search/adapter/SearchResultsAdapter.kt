@@ -1,5 +1,7 @@
 package com.chetdeva.flickrit.search.adapter
 
+import android.support.v7.recyclerview.extensions.ListAdapter
+import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import com.chetdeva.flickrit.network.dto.PhotoDto
@@ -11,12 +13,10 @@ import com.chetdeva.flickrit.search.SearchContract
 
 class SearchResultsAdapter(
         private val adapter: SearchContract.Adapter
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), Notifiable<PhotoDto?>, Loadable {
-
-    private val photos: MutableList<PhotoDto?> = mutableListOf()
+) : ListAdapter<PhotoDto?, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
 
     override fun getItemViewType(position: Int): Int {
-        return if (photos[position] == null) {
+        return if (getItem(position) == null) {
             ProgressViewHolder.VIEW_TYPE
         } else {
             super.getItemViewType(position)
@@ -35,41 +35,20 @@ class SearchResultsAdapter(
         if (holder.itemViewType == ProgressViewHolder.VIEW_TYPE) {
             (holder as ProgressViewHolder).bind(true)
         } else {
-            (holder as PhotoViewHolder).bind(photos[position]!!)
+            (holder as PhotoViewHolder).bind(getItem(position)!!)
         }
     }
 
-    override fun getItemCount(): Int {
-        return photos.count()
-    }
+    companion object {
+        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<PhotoDto?>() {
 
-    override fun addAllNotify(list: List<PhotoDto?>) {
-        this.photos.addAll(list)
-        notifyItemRangeChanged(list.size, this.photos.size - 1)
-    }
+            override fun areItemsTheSame(oldItem: PhotoDto?, newItem: PhotoDto?): Boolean {
+                return oldItem?.id == newItem?.id
+            }
 
-    override fun addNotify(item: PhotoDto?) {
-        photos.add(item)
-        notifyItemInserted(photos.size - 1)
-    }
-
-    override fun removeNotify(position: Int) {
-        photos.removeAt(position)
-        notifyItemRemoved(photos.size)
-    }
-
-    override fun clearNotify() {
-        photos.clear()
-        notifyDataSetChanged()
-    }
-
-    override fun addLoaderAtBottom() {
-        addNotify(null)
-    }
-
-    override fun removeLoaderFromBottom() {
-        if (photos.size > 0 && photos[photos.size - 1] == null) {
-            removeNotify(photos.size - 1)
+            override fun areContentsTheSame(oldItem: PhotoDto?, newItem: PhotoDto?): Boolean {
+                return oldItem == newItem
+            }
         }
     }
 }

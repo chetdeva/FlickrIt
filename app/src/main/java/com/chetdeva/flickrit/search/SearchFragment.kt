@@ -103,19 +103,19 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun refreshAdapter() {
-        results.post { adapter.clearNotify() }
+        results.post { adapter.notifyDataSetChanged() }
     }
 
     private fun showLoader() {
-        results.post { adapter.addLoaderAtBottom() }
+//        results.post { adapter.addLoaderAtBottom() }
     }
 
     private fun hideLoader() {
-        results.post { adapter.removeLoaderFromBottom() }
+//        results.post { adapter.removeLoaderFromBottom() }
     }
 
     private fun showResults(photos: List<PhotoDto>) {
-        results.post { adapter.addAllNotify(photos) }
+        results.post { adapter.submitList(photos) }
     }
 
     private fun showError(message: String) {
