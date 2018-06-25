@@ -10,15 +10,14 @@ import android.util.Log
 import android.view.*
 import android.widget.ProgressBar
 import com.chetdeva.flickrit.R
-import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.chetdeva.flickrit.util.extension.gone
 import com.chetdeva.flickrit.util.extension.isVisible
+import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.util.extension.visible
-import com.chetdeva.flickrit.util.mainThread
 import com.chetdeva.flickrit.util.scroll.RecyclerViewScrollCallback
 
 
@@ -28,6 +27,9 @@ class SearchFragment : Fragment(), SearchContract.View {
     private lateinit var results: RecyclerView
     private lateinit var loader: ProgressBar
     private var searchView: SearchView? = null
+
+    override var isActive: Boolean = false
+        get() = isAdded
 
     override lateinit var presenter: SearchContract.Presenter
 
@@ -96,7 +98,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         presenter.search(query)
     }
 
-    override fun render(state: SearchState) = mainThread {
+    override fun render(state: SearchState) {
         Log.i("SearchFragment", "state: $state")
 
         if (state.error.isNotBlank()) {

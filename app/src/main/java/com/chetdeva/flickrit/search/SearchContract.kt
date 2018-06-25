@@ -21,8 +21,12 @@ interface SearchContract {
     }
 
     interface Interactor {
-        fun search(query: String, publish: (SearchModel) -> Unit)
-        fun nextPage(publish: (SearchModel) -> Unit)
+        interface Callback {
+            fun publish(searchModel: SearchModel)
+        }
+
+        fun search(query: String, callback: Callback)
+        fun nextPage(callback: Callback)
     }
 
     interface Adapter {

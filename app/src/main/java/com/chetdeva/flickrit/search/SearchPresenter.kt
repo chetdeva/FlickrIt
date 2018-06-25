@@ -23,15 +23,19 @@ class SearchPresenter(
     }
 
     override fun search(query: String) {
-        interactor.search(query) {
-            view.render(searchState(it))
-        }
+        interactor.search(query, object : SearchContract.Interactor.Callback {
+            override fun publish(searchModel: SearchModel) {
+                view.render(searchState(searchModel))
+            }
+        })
     }
 
     override fun loadNextPage() {
-        interactor.nextPage {
-            view.render(searchState(it))
-        }
+        interactor.nextPage(object : SearchContract.Interactor.Callback {
+            override fun publish(searchModel: SearchModel) {
+                view.render(searchState(searchModel))
+            }
+        })
     }
 
     private fun searchState(model: SearchModel): SearchState {
