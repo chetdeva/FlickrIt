@@ -5,5 +5,5 @@
     <dimen name="two_dp">2dp</dimen>
     <dimen name="splash_text_size">32sp</dimen>
     <dimen name="searching_text_size">16sp</dimen>
-    <dimen name="searching_text_padding">12dp</dimen>
+    <dimen name="searching_text_padding">16dp</dimen>
 </resources>

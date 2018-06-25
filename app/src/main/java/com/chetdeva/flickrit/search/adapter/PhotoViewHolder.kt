@@ -28,7 +28,7 @@ class PhotoViewHolder(
         }
 
         itemView.setOnClickListener {
-            adapter.onResultClicked(photo)
+            adapter.onPhotoClicked(photo)
         }
     }
 

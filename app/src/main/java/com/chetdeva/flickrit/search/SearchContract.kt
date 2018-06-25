@@ -28,6 +28,6 @@ interface SearchContract {
 
     interface Adapter {
         fun loadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit)
-        fun onResultClicked(photo: PhotoDto)
+        fun onPhotoClicked(photo: PhotoDto)
     }
 }

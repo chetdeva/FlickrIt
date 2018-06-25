@@ -19,3 +19,16 @@ data class SearchModel(
         val Init = SearchModel()
     }
 }
+
+/**
+ * convert [SearchModel] to [SearchState]
+ */
+fun SearchModel.state(): SearchState {
+    return SearchState(
+            refresh = refresh,
+            showLoader = showLoader,
+            hideLoader = hideLoader,
+            photos = photos,
+            error = error)
+}
+

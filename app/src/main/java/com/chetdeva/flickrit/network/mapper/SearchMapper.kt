@@ -8,6 +8,8 @@ import com.chetdeva.flickrit.util.Mapper
 import java.util.*
 
 /**
+ * map [SearchResponse] to [SearchResultDto] and back
+ *
  * @author chetansachdeva
  */
 

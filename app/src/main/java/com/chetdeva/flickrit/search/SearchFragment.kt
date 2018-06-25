@@ -27,6 +27,9 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     private var infiniteScrollListener: InfiniteScrollListener? = null
 
+    /**
+     * helper to calculate number of spans in a Grid based on a [RecyclerView] viewType
+     */
     private val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
         override fun getSpanSize(position: Int): Int {
             val viewType = adapter.getItemViewType(position)
@@ -37,6 +40,9 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
+    /**
+     * callback submit change in [SearchView] to presenter
+     */
     private var onQueryTextListener: SearchView.OnQueryTextListener? = object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String): Boolean {
             search(query)
@@ -48,6 +54,11 @@ class SearchFragment : Fragment(), SearchContract.View {
             return true
         }
     }
+
+    override var isActive: Boolean = false
+        get() = isAdded
+
+    override lateinit var presenter: SearchContract.Presenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -61,6 +72,9 @@ class SearchFragment : Fragment(), SearchContract.View {
         return view
     }
 
+    /**
+     * setup results with [SearchResultsAdapter] and register [InfiniteScrollListener] callback
+     */
     private fun setupList() {
         val layoutManager = GridLayoutManager(context, MAX_GRID_SPAN_COUNT)
         layoutManager.spanSizeLookup = spanSizeLookup
@@ -81,20 +95,16 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.addOnScrollListener(infiniteScrollListener)
     }
 
-    override var isActive: Boolean = false
-        get() = isAdded
-
-    override lateinit var presenter: SearchContract.Presenter
-
-    override fun onResume() {
-        super.onResume()
-        presenter.start()
-    }
-
+    /**
+     * search a query string
+     */
     private fun search(query: String) {
         presenter.search(query)
     }
 
+    /**
+     * render the [SearchState] on the View
+     */
     override fun render(state: SearchState) {
         Log.i("SearchFragment", "state: $state")
         if (state.refresh) {
@@ -115,38 +125,62 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
+    /**
+     * show loader on the screen
+     */
     private fun showScreenLoader() {
         searching.visible()
     }
 
+    /**
+     * hide loader from the screen
+     */
     private fun hideScreenLoaderIfShown() {
         if (searching.isVisible) {
             searching.gone()
         }
     }
 
+    /**
+     * hide keyboard from the screen
+     */
     private fun hideKeyboard() {
         searchView?.clearFocus() ?: activity?.hideKeyboard()
     }
 
+    /**
+     * clear the [PhotoDto] list
+     */
     private fun clearList() {
         showList(emptyList())
     }
 
+    /**
+     * show loader at the bottom of the [PhotoDto] list and update it
+     */
     private fun showLoaderAndUpdate(photos: List<PhotoDto?>) {
         val list = photos.toMutableList()
         list.add(null)
         showList(list)
     }
 
+    /**
+     * submit [PhotoDto] list to [SearchResultsAdapter]. This calculates diff and reflects changes
+     */
     private fun showList(list: List<PhotoDto?>) {
         results.post { adapter.submitList(list) }
     }
 
+    /**
+     * hide loader from the bottom of the [PhotoDto] list and update it
+     */
     private fun hideLoaderAndUpdate(photos: List<PhotoDto?>) {
         showList(photos)
     }
 
+    /**
+     * show error via Snackbar
+     */
     private fun showError(message: String) {
         results.showSnackbar(message)
     }
@@ -169,6 +203,11 @@ class SearchFragment : Fragment(), SearchContract.View {
     private fun searchView(menu: Menu?): SearchView? {
         val searchItem = menu?.findItem(R.id.action_search)
         return searchItem?.actionView as? SearchView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        presenter.start()
     }
 
     override fun onDestroy() {

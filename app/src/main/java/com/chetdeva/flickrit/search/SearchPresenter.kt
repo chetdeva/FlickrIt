@@ -19,38 +19,47 @@ class SearchPresenter(
         view.presenter = this
     }
 
+    /**
+     * publishes [SearchState] to the [SearchContract.View].
+     */
     private val publisher = object : Publisher<SearchModel> {
         override fun publish(model: SearchModel) {
-            view.render(searchState(model))
+            view.render(model.state())
         }
     }
 
+    /**
+     * search for "kittens" on start
+     */
     override fun start() {
         search("kittens")
     }
 
+    /**
+     * search Flickr for the [query] text
+     */
     override fun search(query: String) {
         interactor.search(query, publisher)
     }
 
+    /**
+     * load next page with the previous query text
+     */
     override fun loadNextPage() {
         interactor.nextPage(publisher)
     }
 
-    private fun searchState(model: SearchModel): SearchState {
-        return SearchState(
-                refresh = model.refresh,
-                showLoader = model.showLoader,
-                hideLoader = model.hideLoader,
-                photos = model.photos,
-                error = model.error)
-    }
-
+    /**
+     * load image from [ImageService]
+     */
     override fun loadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
         return imageService.downloadImage(url, onDownloadComplete)
     }
 
-    override fun onResultClicked(photo: PhotoDto) {
+    /**
+     * called when user taps on a [PhotoDto]
+     */
+    override fun onPhotoClicked(photo: PhotoDto) {
 
     }
 }

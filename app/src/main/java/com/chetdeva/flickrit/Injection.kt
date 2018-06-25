@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit
 
 
 /**
+ * Singleton holder to inject dependencies wherever needed
+ *
  * @author chetansachdeva
  */
 

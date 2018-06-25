@@ -21,6 +21,10 @@ class SearchInteractor(
 
     private var model: SearchModel = SearchModel.Init
 
+    /**
+     * validate [query] text and search [FlickrApiService]
+     * publish [SearchModel] via [publisher]
+     */
     override fun search(query: String,
                         publisher: Publisher<SearchModel>) {
 
@@ -36,6 +40,10 @@ class SearchInteractor(
         }
     }
 
+    /**
+     * search [FlickrApiService] with given [query] text and [page] number
+     * publish [SearchModel] via [publisher]
+     */
     private fun searchFlickr(query: String,
                              page: Int,
                              publisher: Publisher<SearchModel>) {
@@ -52,6 +60,9 @@ class SearchInteractor(
         }
     }
 
+    /**
+     * called when search has successfully completed
+     */
     private fun onSearchSuccess(response: SearchResponse, publisher: Publisher<SearchModel>) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val photos = updateList(mapper.mapFromEntity(response).photos)
@@ -68,10 +79,16 @@ class SearchInteractor(
         }
     }
 
+    /**
+     * update the [PhotoDto] list in [SearchModel]
+     */
     private fun updateList(photos: List<PhotoDto>): MutableList<PhotoDto> {
         return model.photos.toMutableList().apply { addAll(photos) }
     }
 
+    /**
+     * called when search errors out
+     */
     private fun onSearchError(error: String, publisher: Publisher<SearchModel>) {
         model = model.copy(
                 refresh = false,
@@ -81,6 +98,10 @@ class SearchInteractor(
         publisher.publish(model)
     }
 
+    /**
+     * search next page with the previous query text held in [SearchModel]
+     * publish [SearchModel] via [publisher]
+     */
     override fun nextPage(publisher: Publisher<SearchModel>) {
         if (model.showLoader) return
         model = model.copy(

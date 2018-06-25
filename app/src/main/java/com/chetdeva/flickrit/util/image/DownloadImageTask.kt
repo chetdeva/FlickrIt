@@ -17,7 +17,7 @@ class DownloadImageTask(
 ) : AsyncTask<String, Unit, Bitmap?>() {
 
     override fun doInBackground(vararg params: String): Bitmap? {
-        val request = ApiClient.request(params.first())
+        val request = ApiClient.buildRequest(params.first())
 
         val response = try {
             apiClient.syncRequest(request)

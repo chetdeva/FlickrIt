@@ -10,12 +10,18 @@ import java.util.*
 
 
 /**
+ * manages Flickr API HTTP calls
+ *
  * @author chetansachdeva
  */
 
 class FlickrApiService(private val apiClient: ApiClient,
                        private val gson: Gson) {
 
+    /**
+     * search Flickr API for given [query] text and [page] number
+     * publish a [NetworkResult] of type [SearchResponse]
+     */
     fun search(query: String,
                page: Int,
                onResult: (NetworkResult<SearchResponse>) -> Unit) {
@@ -26,7 +32,7 @@ class FlickrApiService(private val apiClient: ApiClient,
         params["per_page"] = SearchInteractor.MAX_PAGE_SIZE.toString()
         params["method"] = SEARCH_PHOTOS_METHOD
 
-        val request = ApiClient.request(baseUrl = FLICKR_API_BASE_URL, params = params)
+        val request = ApiClient.buildRequest(baseUrl = FLICKR_API_BASE_URL, params = params)
 
         apiClient.asyncRequest(request, { response ->
             val searchResponse = gson.fromJson<SearchResponse>(response.string())

@@ -4,6 +4,8 @@ import com.chetdeva.flickrit.network.entities.Photo
 import java.util.*
 
 /**
+ * create [String] url from [Photo] object
+ *
  * @author chetansachdeva
  */
 
