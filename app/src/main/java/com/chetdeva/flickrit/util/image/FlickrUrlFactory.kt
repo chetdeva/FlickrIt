@@ -16,7 +16,7 @@ class FlickrUrlFactory : UrlFactory<Photo> {
         private const val FLICKR_IMAGE_URL_FORMAT = "http://farm%1\$s.static.flickr.com/%2\$s/%3\$s_%4\$s.jpg"
     }
 
-    override fun create(photo: Photo): String? {
+    override fun createUrl(photo: Photo): String? {
         if (photo.farm != null && !photo.server.isNullOrBlank() &&
                 !photo.id.isNullOrBlank() && !photo.secret.isNullOrBlank()) {
             val farm = photo.farm!!

@@ -5,6 +5,7 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.network.dto.SearchResultDto
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.util.Mapper
+import com.chetdeva.flickrit.util.NetworkResult
 import com.chetdeva.flickrit.util.Publisher
 import com.chetdeva.flickrit.util.executor.AppExecutors
 
@@ -13,9 +14,9 @@ import com.chetdeva.flickrit.util.executor.AppExecutors
  */
 
 class SearchInteractor(
-        private val flickrApi: FlickrApiService,
-        private val appExecutors: AppExecutors,
-        private val searchMapper: Mapper<SearchResponse, SearchResultDto>
+        private val apiService: FlickrApiService,
+        private val executors: AppExecutors,
+        private val mapper: Mapper<SearchResponse, SearchResultDto>
 ) : SearchContract.Interactor {
 
     private var model: SearchModel = SearchModel.Init
@@ -28,33 +29,32 @@ class SearchInteractor(
             publisher.publish(model)
             searchFlickr(query, model.page, publisher)
         } else {
-            onSearchError("Type at least 3 characters", publisher)
+            onSearchError(TOO_SMALL_QUERY_ERROR, publisher)
         }
     }
 
     private fun searchFlickr(query: String,
                              page: Int,
                              publisher: Publisher<SearchModel>) {
-        appExecutors.networkIO.execute {
-            flickrApi.search(query, page, {
-                appExecutors.mainThread.execute {
-                    onSearchSuccess(it, publisher)
+        executors.networkIO.execute {
+            apiService.search(query, page) { result ->
+                executors.UI.execute {
+                    when (result) {
+                        is NetworkResult.Success -> onSearchSuccess(result.data, publisher)
+                        is NetworkResult.Error -> onSearchError(result.error, publisher)
+                    }
                 }
-            }, {
-                appExecutors.mainThread.execute {
-                    onSearchError(it, publisher)
-                }
-            })
+            }
         }
     }
 
     private fun onSearchSuccess(response: SearchResponse, publisher: Publisher<SearchModel>) {
         if (response.photos?.photo?.isNotEmpty() == true) {
-            val photos = updateList(searchMapper.mapFromEntity(response).photos)
+            val photos = updateList(mapper.mapFromEntity(response).photos)
             model = model.copy(showLoader = false, hideLoader = true, photos = photos, page = model.page + 1)
             publisher.publish(model)
         } else {
-            onSearchError("No more items found", publisher)
+            onSearchError(NO_MORE_ITEMS_ERROR, publisher)
         }
     }
 
@@ -77,5 +77,7 @@ class SearchInteractor(
     companion object {
         const val VISIBLE_THRESHOLD: Int = 9
         const val MAX_PAGE_SIZE: Int = 12
+        const val TOO_SMALL_QUERY_ERROR = "Type at least 3 characters"
+        const val NO_MORE_ITEMS_ERROR = "No more items found"
     }
 }

@@ -29,7 +29,7 @@ open class SingletonHolderDoubleArg<out T, in A, in B>(creator: (A, B) -> T) {
     }
 
     /**
-     * Used to force [SingletonHolderDoubleArg.getInstance] to create a new instance next time it's called.
+     * Used to force [SingletonHolderDoubleArg.getInstance] to createUrl a new instance next time it's called.
      * Used in tests.
      */
     fun clearInstance() {

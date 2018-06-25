@@ -9,7 +9,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager
  * @author chetansachdeva on 28/11/17
  */
 
-object RecyclerViewUtil {
+object RecyclerViewHelper {
 
     fun computeLayoutManagerType(layoutManager: RecyclerView.LayoutManager): LayoutManagerType {
         return when (layoutManager) {
@@ -28,8 +28,8 @@ object RecyclerViewUtil {
                 LayoutManagerType.LINEAR, LayoutManagerType.DEFAULT -> visibleThreshold
             }
 
-    fun getLastVisibleItemPosition(layoutManager: RecyclerView.LayoutManager,
-                                   layoutManagerType: LayoutManagerType): Int =
+    fun getFirstVisibleItemPosition(layoutManager: RecyclerView.LayoutManager,
+                                    layoutManagerType: LayoutManagerType): Int =
             when (layoutManagerType) {
                 LayoutManagerType.LINEAR, LayoutManagerType.GRID -> (layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
                 LayoutManagerType.STAGGERED_GRID -> {

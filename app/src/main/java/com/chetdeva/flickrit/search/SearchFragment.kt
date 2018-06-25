@@ -18,7 +18,7 @@ import com.chetdeva.flickrit.util.extension.gone
 import com.chetdeva.flickrit.util.extension.isVisible
 import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.util.extension.visible
-import com.chetdeva.flickrit.util.scroll.RecyclerViewScrollCallback
+import com.chetdeva.flickrit.util.recyclerview.RecyclerViewScrollCallback
 
 
 class SearchFragment : Fragment(), SearchContract.View {
@@ -84,7 +84,6 @@ class SearchFragment : Fragment(), SearchContract.View {
                                onScrolled: (Int) -> Unit): RecyclerViewScrollCallback {
         return RecyclerViewScrollCallback.Builder(layoutManager)
                 .visibleThreshold(VISIBLE_THRESHOLD)
-                .resetLoadingState(true)
                 .onScrolledListener(onScrolled)
                 .build()
     }

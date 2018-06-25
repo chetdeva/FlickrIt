@@ -5,5 +5,5 @@ package com.chetdeva.flickrit.util.image
  */
 
 interface UrlFactory<E> {
-    fun create(entity: E) : String?
+    fun createUrl(entity: E) : String?
 }
