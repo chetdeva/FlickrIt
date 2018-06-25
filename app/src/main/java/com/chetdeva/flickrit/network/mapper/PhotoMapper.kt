@@ -7,6 +7,8 @@ import com.chetdeva.flickrit.util.Mapper
 import com.chetdeva.flickrit.util.image.UrlFactory
 
 /**
+ * map [Photo] to a [PhotoDto] and back
+ *
  * @author chetansachdeva
  */
 

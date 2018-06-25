@@ -21,11 +21,18 @@ class SearchInteractor(
 
     private var model: SearchModel = SearchModel.Init
 
+    /**
+     * validate [query] text and search [FlickrApiService]
+     * publish [SearchModel] via [publisher]
+     */
     override fun search(query: String,
                         publisher: Publisher<SearchModel>) {
 
         if (query.isNotBlank() && query.length >= 3) {
-            model = SearchModel.Init.copy(query = query)
+            model = SearchModel.Init.copy(
+                    refresh = true,
+                    showLoader = true,
+                    query = query)
             publisher.publish(model)
             searchFlickr(query, model.page, publisher)
         } else {
@@ -33,9 +40,14 @@ class SearchInteractor(
         }
     }
 
+    /**
+     * search [FlickrApiService] with given [query] text and [page] number
+     * publish [SearchModel] via [publisher]
+     */
     private fun searchFlickr(query: String,
                              page: Int,
                              publisher: Publisher<SearchModel>) {
+
         executors.networkIO.execute {
             apiService.search(query, page) { result ->
                 executors.UI.execute {
@@ -48,28 +60,55 @@ class SearchInteractor(
         }
     }
 
+    /**
+     * called when search has successfully completed
+     */
     private fun onSearchSuccess(response: SearchResponse, publisher: Publisher<SearchModel>) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val photos = updateList(mapper.mapFromEntity(response).photos)
-            model = model.copy(showLoader = false, hideLoader = true, photos = photos, page = model.page + 1)
+            model = model.copy(
+                    refresh = false,
+                    showLoader = false,
+                    hideLoader = true,
+                    photos = photos,
+                    page = model.page + 1,
+                    error = "")
             publisher.publish(model)
         } else {
             onSearchError(NO_MORE_ITEMS_ERROR, publisher)
         }
     }
 
+    /**
+     * update the [PhotoDto] list in [SearchModel]
+     */
     private fun updateList(photos: List<PhotoDto>): MutableList<PhotoDto> {
         return model.photos.toMutableList().apply { addAll(photos) }
     }
 
+    /**
+     * called when search errors out
+     */
     private fun onSearchError(error: String, publisher: Publisher<SearchModel>) {
-        model = model.copy(showLoader = false, hideLoader = true, error = error)
+        model = model.copy(
+                refresh = false,
+                showLoader = false,
+                hideLoader = true,
+                error = error)
         publisher.publish(model)
     }
 
+    /**
+     * search next page with the previous query text held in [SearchModel]
+     * publish [SearchModel] via [publisher]
+     */
     override fun nextPage(publisher: Publisher<SearchModel>) {
         if (model.showLoader) return
-        model = model.copy(showLoader = true, hideLoader = false)
+        model = model.copy(
+                refresh = false,
+                showLoader = true,
+                hideLoader = false,
+                error = "")
         publisher.publish(model)
         searchFlickr(model.query, model.page, publisher)
     }

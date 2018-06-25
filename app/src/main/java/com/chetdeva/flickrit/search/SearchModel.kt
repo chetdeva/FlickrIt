@@ -7,6 +7,7 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
  */
 
 data class SearchModel(
+        val refresh: Boolean = false,
         val hideLoader: Boolean = false,
         val showLoader: Boolean = false,
         val photos: List<PhotoDto> = emptyList(),
@@ -18,3 +19,16 @@ data class SearchModel(
         val Init = SearchModel()
     }
 }
+
+/**
+ * convert [SearchModel] to [SearchState]
+ */
+fun SearchModel.state(): SearchState {
+    return SearchState(
+            refresh = refresh,
+            showLoader = showLoader,
+            hideLoader = hideLoader,
+            photos = photos,
+            error = error)
+}
+

@@ -1,7 +1,7 @@
 package com.chetdeva.flickrit.search
 
 import com.chetdeva.flickrit.capture
-import com.chetdeva.flickrit.network.ImageClient
+import com.chetdeva.flickrit.network.ImageService
 import com.chetdeva.flickrit.util.Publisher
 import org.junit.Before
 import org.junit.Test
@@ -23,26 +23,38 @@ class SearchPresenterTest {
     @Mock
     private lateinit var interactor: SearchContract.Interactor
     @Mock
-    private lateinit var imageClient: ImageClient
+    private lateinit var imageService: ImageService
     @Mock
     private lateinit var view: SearchContract.View
 
     @Captor
-    private lateinit var modelCaptor: ArgumentCaptor<Publisher<SearchModel>>
+    private lateinit var publisher: ArgumentCaptor<Publisher<SearchModel>>
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        presenter = SearchPresenter(interactor, imageClient, view)
+        presenter = SearchPresenter(interactor, imageService, view)
     }
 
     @Test
     fun testCreatePresenter() {
         // when
-        presenter = SearchPresenter(interactor, imageClient, view)
+        presenter = SearchPresenter(interactor, imageService, view)
 
         // then
         verify(view).presenter = presenter
+    }
+
+    @Test
+    fun testRefreshState() {
+        // when
+        presenter.search("abc")
+
+        // then
+        verify(interactor).search(anyString(), capture(publisher))
+        publisher.value.publish(SearchModel.Init.copy(refresh = true))
+
+        verify(view).render(SearchState.Init.copy(refresh = true))
     }
 
     @Test
@@ -51,8 +63,8 @@ class SearchPresenterTest {
         presenter.search("abc")
 
         // then
-        verify(interactor).search(anyString(), capture(modelCaptor))
-        modelCaptor.value.publish(SearchModel.Init)
+        verify(interactor).search(anyString(), capture(publisher))
+        publisher.value.publish(SearchModel.Init)
 
         verify(view).render(SearchState.Init)
     }
@@ -63,8 +75,8 @@ class SearchPresenterTest {
         presenter.loadNextPage()
 
         // then
-        verify(interactor).nextPage(capture(modelCaptor))
-        modelCaptor.value.publish(SearchModel.Init)
+        verify(interactor).nextPage(capture(publisher))
+        publisher.value.publish(SearchModel.Init)
 
         verify(view).render(SearchState.Init)
     }

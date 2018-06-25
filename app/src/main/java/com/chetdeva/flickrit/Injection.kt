@@ -2,7 +2,7 @@ package com.chetdeva.flickrit
 
 import com.chetdeva.flickrit.network.ApiClient
 import com.chetdeva.flickrit.network.FlickrApiService
-import com.chetdeva.flickrit.network.ImageClient
+import com.chetdeva.flickrit.network.ImageService
 import com.chetdeva.flickrit.network.mapper.SearchMapper
 import com.chetdeva.flickrit.search.SearchContract
 import com.chetdeva.flickrit.search.SearchInteractor
@@ -17,6 +17,8 @@ import java.util.concurrent.TimeUnit
 
 
 /**
+ * Singleton holder to inject dependencies wherever needed
+ *
  * @author chetansachdeva
  */
 
@@ -27,8 +29,8 @@ object Injection {
     private val searchMapper by lazy { SearchMapper() }
     private val appExecutors by lazy { AppExecutors(DiskIOThreadExecutor()) }
 
-    fun provideImageClient(): ImageClient {
-        return ImageClient(provideApiClient(okHttpClient))
+    fun provideImageClient(): ImageService {
+        return ImageService(provideApiClient(okHttpClient))
     }
 
     fun provideSearchInteractor(): SearchContract.Interactor {

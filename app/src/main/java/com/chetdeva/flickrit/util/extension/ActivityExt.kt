@@ -2,6 +2,8 @@ package com.chetdeva.flickrit.util.extension
 
 import android.app.Activity
 import android.support.annotation.StringRes
+import android.support.design.widget.Snackbar
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 
@@ -26,4 +28,9 @@ fun Activity.hideKeyboard() {
 fun Activity.showKeyboard() {
     val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
+}
+
+inline fun View.showSnackbar(message: String, length: Int = Snackbar.LENGTH_SHORT) {
+    val snack = Snackbar.make(this, message, length)
+    snack.show()
 }

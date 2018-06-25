@@ -18,6 +18,9 @@ class MainActivity : AppCompatActivity() {
         navigateToSearch()
     }
 
+    /**
+     * navigate to [SearchFragment]
+     */
     private fun navigateToSearch() {
         val didFindSearchFragment = supportFragmentManager.findFragmentById(R.id.content) as SearchFragment?
         val searchFragment = didFindSearchFragment ?: SearchFragment.newInstance()
@@ -28,6 +31,9 @@ class MainActivity : AppCompatActivity() {
         inject(searchFragment)
     }
 
+    /**
+     * inject dependencies required for [SearchFragment]
+     */
     private fun inject(searchFragment: SearchFragment) {
         val interactor = Injection.provideSearchInteractor()
         val imageClient = Injection.provideImageClient()
