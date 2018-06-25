@@ -40,8 +40,8 @@ class SearchPresenter(
 
     private fun searchState(model: SearchModel): SearchState {
         return SearchState(
-                showLoader = model.loading,
-                hideLoader = !model.loading,
+                showLoader = model.showLoader,
+                hideLoader = model.hideLoader,
                 photos = model.photos,
                 error = model.error)
     }

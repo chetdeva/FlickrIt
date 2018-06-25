@@ -24,9 +24,11 @@ class SearchInteractor(
                         callback: Callback) {
 
         if (query.isNotBlank() && query.length >= 3) {
-            model = model.copy(loading = true, photos = emptyList(), query = query, page = 1)
+            model = SearchModel.Init.copy(query = query)
             callback.publish(model)
             searchFlickr(query, model.page, callback)
+        } else {
+            onSearchError("Type at least 3 characters", callback)
         }
     }
 
@@ -49,10 +51,10 @@ class SearchInteractor(
     private fun onSearchSuccess(response: SearchResponse, callback: Callback) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val photos = updateList(searchMapper.mapFromEntity(response).photos)
-            model = model.copy(loading = false, photos = photos, page = model.page + 1)
+            model = model.copy(showLoader = false, hideLoader = true, photos = photos, page = model.page + 1)
             callback.publish(model)
         } else {
-            onSearchError("No Items Found", callback)
+            onSearchError("No more items found", callback)
         }
     }
 
@@ -61,13 +63,13 @@ class SearchInteractor(
     }
 
     private fun onSearchError(error: String, callback: Callback) {
-        model = model.copy(loading = false, error = error)
+        model = model.copy(showLoader = false, hideLoader = true, error = error)
         callback.publish(model)
     }
 
     override fun nextPage(callback: Callback) {
-        if (model.loading) return
-        model = model.copy(loading = true)
+        if (model.showLoader) return
+        model = model.copy(showLoader = true, hideLoader = false)
         callback.publish(model)
         searchFlickr(model.query, model.page, callback)
     }

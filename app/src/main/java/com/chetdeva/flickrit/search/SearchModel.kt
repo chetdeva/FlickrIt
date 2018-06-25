@@ -7,8 +7,9 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
  */
 
 data class SearchModel(
-        val loading: Boolean = false,
-        val photos: List<PhotoDto> = listOf(),
+        val hideLoader: Boolean = false,
+        val showLoader: Boolean = false,
+        val photos: List<PhotoDto> = emptyList(),
         val query: String = "",
         val page: Int = 1,
         val error: String = ""

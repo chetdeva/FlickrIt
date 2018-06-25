@@ -100,19 +100,18 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun render(state: SearchState) {
         Log.i("SearchFragment", "state: $state")
-
+        if (state == SearchState.Init) {
+            clearSearchFocus()
+            clearList()
+            showScreenLoader()
+            return
+        }
         if (state.error.isNotBlank()) {
             hideScreenLoaderIfShown()
             showError(state.error)
         }
         if (state.showLoader) {
-            if (state.photos.isEmpty()) {
-                clearSearchFocus()
-                clearList()
-                showScreenLoader()
-            } else {
-                showLoaderAndUpdate(state.photos)
-            }
+            showLoaderAndUpdate(state.photos)
         }
         if (state.hideLoader) {
             hideScreenLoaderIfShown()
