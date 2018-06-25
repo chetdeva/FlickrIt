@@ -2,7 +2,7 @@
 
 FlickrIt lets you search images from Flickr API. It uses the Flickr API key.
 
-<img src="./README_images/ic_flickr_logo.png.png" width="400" height="400"/>
+<img src="./README_images/ic_flickr_logo.png" width="400" height="400"/>
 
 ### How FlickrIt search works?
 
