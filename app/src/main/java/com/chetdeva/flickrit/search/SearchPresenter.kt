@@ -39,6 +39,7 @@ class SearchPresenter(
 
     private fun searchState(model: SearchModel): SearchState {
         return SearchState(
+                refresh = model.refresh,
                 showLoader = model.showLoader,
                 hideLoader = model.hideLoader,
                 photos = model.photos,

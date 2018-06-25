@@ -56,7 +56,7 @@ class SearchInteractorTest {
         verify(apiService).search(anyString(), anyInt(), capture(apiResultCaptor))
         apiResultCaptor.value.invoke(NetworkResult.Success(SearchResponse()))
 
-        verify(publisher).publish(SearchModel.Init.copy(query = mockQuery))
+        verify(publisher).publish(SearchModel.Init.copy(refresh = true, showLoader = true, query = mockQuery))
     }
 
     @Test

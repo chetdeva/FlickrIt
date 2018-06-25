@@ -8,30 +8,23 @@ import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.*
-import android.widget.ProgressBar
+import android.widget.TextView
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
-import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
-import com.chetdeva.flickrit.util.extension.gone
-import com.chetdeva.flickrit.util.extension.isVisible
-import com.chetdeva.flickrit.util.extension.showToast
-import com.chetdeva.flickrit.util.extension.visible
-import com.chetdeva.flickrit.util.recyclerview.RecyclerViewScrollCallback
+import com.chetdeva.flickrit.util.extension.*
+import com.chetdeva.flickrit.util.recyclerview.InfiniteScrollListener
 
 
 class SearchFragment : Fragment(), SearchContract.View {
 
     private lateinit var adapter: SearchResultsAdapter
     private lateinit var results: RecyclerView
-    private lateinit var loader: ProgressBar
+    private lateinit var searching: TextView
     private var searchView: SearchView? = null
 
-    override var isActive: Boolean = false
-        get() = isAdded
-
-    override lateinit var presenter: SearchContract.Presenter
+    private var infiniteScrollListener: InfiniteScrollListener? = null
 
     private val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
         override fun getSpanSize(position: Int): Int {
@@ -61,7 +54,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         setHasOptionsMenu(true)
         with(view) {
             results = findViewById(R.id.results)
-            loader = findViewById(R.id.loader)
+            searching = findViewById(R.id.searching)
         }
         setupList()
         return view
@@ -75,18 +68,22 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.setHasFixedSize(true)
         adapter = SearchResultsAdapter(presenter)
         results.adapter = adapter
-        results.addOnScrollListener(scrollCallback(layoutManager) {
-            presenter.loadNextPage()
-        })
+        addScrollCallback(layoutManager)
     }
 
-    private fun scrollCallback(layoutManager: RecyclerView.LayoutManager,
-                               onScrolled: (Int) -> Unit): RecyclerViewScrollCallback {
-        return RecyclerViewScrollCallback.Builder(layoutManager)
-                .visibleThreshold(VISIBLE_THRESHOLD)
-                .onScrolledListener(onScrolled)
-                .build()
+    private fun addScrollCallback(layoutManager: GridLayoutManager) {
+        infiniteScrollListener = object : InfiniteScrollListener(layoutManager) {
+            override fun onLoadMore() {
+                presenter.loadNextPage()
+            }
+        }
+        results.addOnScrollListener(infiniteScrollListener)
     }
+
+    override var isActive: Boolean = false
+        get() = isAdded
+
+    override lateinit var presenter: SearchContract.Presenter
 
     override fun onResume() {
         super.onResume()
@@ -99,8 +96,8 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun render(state: SearchState) {
         Log.i("SearchFragment", "state: $state")
-        if (state == SearchState.Init) {
-            clearSearchFocus()
+        if (state.refresh) {
+            hideKeyboard()
             clearList()
             showScreenLoader()
             return
@@ -110,26 +107,28 @@ class SearchFragment : Fragment(), SearchContract.View {
             showError(state.error)
         }
         if (state.showLoader) {
+            infiniteScrollListener?.isDataLoading = true
             showLoaderAndUpdate(state.photos)
         }
         if (state.hideLoader) {
+            infiniteScrollListener?.isDataLoading = false
             hideScreenLoaderIfShown()
             hideLoaderAndUpdate(state.photos)
         }
     }
 
     private fun showScreenLoader() {
-        loader.visible()
+        searching.visible()
     }
 
     private fun hideScreenLoaderIfShown() {
-        if (loader.isVisible) {
-            loader.gone()
+        if (searching.isVisible) {
+            searching.gone()
         }
     }
 
-    private fun clearSearchFocus() {
-        searchView?.clearFocus()
+    private fun hideKeyboard() {
+        searchView?.clearFocus() ?: activity?.hideKeyboard()
     }
 
     private fun clearList() {
@@ -151,7 +150,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun showError(message: String) {
-        activity?.showToast(message)
+        results.showSnackbar(message)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
@@ -177,6 +176,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     override fun onDestroy() {
         super.onDestroy()
         onQueryTextListener = null
+        infiniteScrollListener = null
     }
 
     companion object {

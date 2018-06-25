@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="item_photo_padding">4dp</dimen>
+    <dimen name="item_photo_image_height">200dp</dimen>
+    <dimen name="two_dp">2dp</dimen>
+    <dimen name="searching_text_size">16sp</dimen>
+    <dimen name="searching_text_padding">12dp</dimen>
+</resources>

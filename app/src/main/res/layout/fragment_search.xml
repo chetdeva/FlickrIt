@@ -10,12 +10,17 @@
     <android.support.v7.widget.RecyclerView
         android:id="@+id/results"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="@dimen/item_photo_padding" />
 
-    <ProgressBar
-        android:id="@+id/loader"
+    <TextView
+        android:id="@+id/searching"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:padding="12dp" />
+        android:text="@string/searching"
+        android:textColor="@android:color/black"
+        android:textSize="@dimen/searching_text_size"
+        android:padding="@dimen/searching_text_padding" />
 </FrameLayout>

@@ -25,7 +25,10 @@ class SearchInteractor(
                         publisher: Publisher<SearchModel>) {
 
         if (query.isNotBlank() && query.length >= 3) {
-            model = SearchModel.Init.copy(query = query)
+            model = SearchModel.Init.copy(
+                    refresh = true,
+                    showLoader = true,
+                    query = query)
             publisher.publish(model)
             searchFlickr(query, model.page, publisher)
         } else {
@@ -36,6 +39,7 @@ class SearchInteractor(
     private fun searchFlickr(query: String,
                              page: Int,
                              publisher: Publisher<SearchModel>) {
+
         executors.networkIO.execute {
             apiService.search(query, page) { result ->
                 executors.UI.execute {
@@ -51,7 +55,12 @@ class SearchInteractor(
     private fun onSearchSuccess(response: SearchResponse, publisher: Publisher<SearchModel>) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val photos = updateList(mapper.mapFromEntity(response).photos)
-            model = model.copy(showLoader = false, hideLoader = true, photos = photos, page = model.page + 1)
+            model = model.copy(
+                    refresh = false,
+                    showLoader = false,
+                    hideLoader = true,
+                    photos = photos,
+                    page = model.page + 1)
             publisher.publish(model)
         } else {
             onSearchError(NO_MORE_ITEMS_ERROR, publisher)
@@ -63,13 +72,20 @@ class SearchInteractor(
     }
 
     private fun onSearchError(error: String, publisher: Publisher<SearchModel>) {
-        model = model.copy(showLoader = false, hideLoader = true, error = error)
+        model = model.copy(
+                refresh = false,
+                showLoader = false,
+                hideLoader = true,
+                error = error)
         publisher.publish(model)
     }
 
     override fun nextPage(publisher: Publisher<SearchModel>) {
         if (model.showLoader) return
-        model = model.copy(showLoader = true, hideLoader = false)
+        model = model.copy(
+                refresh = false,
+                showLoader = true,
+                hideLoader = false)
         publisher.publish(model)
         searchFlickr(model.query, model.page, publisher)
     }
