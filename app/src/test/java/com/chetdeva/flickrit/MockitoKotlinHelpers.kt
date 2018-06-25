@@ -21,6 +21,7 @@ package com.chetdeva.flickrit
 
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito
+import org.mockito.stubbing.OngoingStubbing
 
 /**
  * Returns Mockito.eq() as nullable type to avoid java.lang.IllegalStateException when
@@ -50,3 +51,28 @@ fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
  */
 inline fun <reified T : Any> argumentCaptor(): ArgumentCaptor<T> =
         ArgumentCaptor.forClass(T::class.java)
+
+fun <T> whenever(methodCall: T): OngoingStubbing<T> = Mockito.`when`(methodCall)!!
+
+fun <T> anyValue(): T {
+    Mockito.any<T>()
+    return uninitialized()
+}
+
+fun <T> anyListValue(): List<T> {
+    Mockito.anyList<T>()
+    return uninitialized()
+}
+
+fun <T> eqValue(value: T): T {
+    Mockito.eq(value)
+    return uninitialized()
+}
+
+fun <T> ArgumentCaptor<T>.captureValue(): T {
+    capture()
+    return uninitialized()
+}
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> uninitialized(): T = null as T

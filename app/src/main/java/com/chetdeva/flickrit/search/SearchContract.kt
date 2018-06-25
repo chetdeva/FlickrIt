@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.chetdeva.flickrit.mvp.BasePresenter
 import com.chetdeva.flickrit.mvp.BaseView
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.util.Publisher
 
 /**
  * @author chetansachdeva
@@ -21,12 +22,8 @@ interface SearchContract {
     }
 
     interface Interactor {
-        interface Callback {
-            fun publish(searchModel: SearchModel)
-        }
-
-        fun search(query: String, callback: Callback)
-        fun nextPage(callback: Callback)
+        fun search(query: String, callback: Publisher<SearchModel>)
+        fun nextPage(callback: Publisher<SearchModel>)
     }
 
     interface Adapter {

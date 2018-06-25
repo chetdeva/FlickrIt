@@ -3,6 +3,7 @@ package com.chetdeva.flickrit.search
 import android.graphics.Bitmap
 import com.chetdeva.flickrit.network.ImageClient
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.util.Publisher
 
 /**
  * @author chetansachdeva
@@ -18,24 +19,22 @@ class SearchPresenter(
         view.presenter = this
     }
 
+    private val publisher = object : Publisher<SearchModel> {
+        override fun publish(model: SearchModel) {
+            view.render(searchState(model))
+        }
+    }
+
     override fun start() {
         search("kittens")
     }
 
     override fun search(query: String) {
-        interactor.search(query, object : SearchContract.Interactor.Callback {
-            override fun publish(searchModel: SearchModel) {
-                view.render(searchState(searchModel))
-            }
-        })
+        interactor.search(query, publisher)
     }
 
     override fun loadNextPage() {
-        interactor.nextPage(object : SearchContract.Interactor.Callback {
-            override fun publish(searchModel: SearchModel) {
-                view.render(searchState(searchModel))
-            }
-        })
+        interactor.nextPage(publisher)
     }
 
     private fun searchState(model: SearchModel): SearchState {

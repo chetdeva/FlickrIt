@@ -4,8 +4,8 @@ import com.chetdeva.flickrit.network.FlickrApiService
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.network.dto.SearchResultDto
 import com.chetdeva.flickrit.network.entities.SearchResponse
-import com.chetdeva.flickrit.search.SearchContract.Interactor.Callback
 import com.chetdeva.flickrit.util.Mapper
+import com.chetdeva.flickrit.util.Publisher
 import com.chetdeva.flickrit.util.executor.AppExecutors
 
 /**
@@ -21,40 +21,40 @@ class SearchInteractor(
     private var model: SearchModel = SearchModel.Init
 
     override fun search(query: String,
-                        callback: Callback) {
+                        publisher: Publisher<SearchModel>) {
 
         if (query.isNotBlank() && query.length >= 3) {
             model = SearchModel.Init.copy(query = query)
-            callback.publish(model)
-            searchFlickr(query, model.page, callback)
+            publisher.publish(model)
+            searchFlickr(query, model.page, publisher)
         } else {
-            onSearchError("Type at least 3 characters", callback)
+            onSearchError("Type at least 3 characters", publisher)
         }
     }
 
     private fun searchFlickr(query: String,
                              page: Int,
-                             callback: Callback) {
+                             publisher: Publisher<SearchModel>) {
         appExecutors.networkIO.execute {
             flickrApi.search(query, page, {
                 appExecutors.mainThread.execute {
-                    onSearchSuccess(it, callback)
+                    onSearchSuccess(it, publisher)
                 }
             }, {
                 appExecutors.mainThread.execute {
-                    onSearchError(it, callback)
+                    onSearchError(it, publisher)
                 }
             })
         }
     }
 
-    private fun onSearchSuccess(response: SearchResponse, callback: Callback) {
+    private fun onSearchSuccess(response: SearchResponse, publisher: Publisher<SearchModel>) {
         if (response.photos?.photo?.isNotEmpty() == true) {
             val photos = updateList(searchMapper.mapFromEntity(response).photos)
             model = model.copy(showLoader = false, hideLoader = true, photos = photos, page = model.page + 1)
-            callback.publish(model)
+            publisher.publish(model)
         } else {
-            onSearchError("No more items found", callback)
+            onSearchError("No more items found", publisher)
         }
     }
 
@@ -62,16 +62,16 @@ class SearchInteractor(
         return model.photos.toMutableList().apply { addAll(photos) }
     }
 
-    private fun onSearchError(error: String, callback: Callback) {
+    private fun onSearchError(error: String, publisher: Publisher<SearchModel>) {
         model = model.copy(showLoader = false, hideLoader = true, error = error)
-        callback.publish(model)
+        publisher.publish(model)
     }
 
-    override fun nextPage(callback: Callback) {
+    override fun nextPage(publisher: Publisher<SearchModel>) {
         if (model.showLoader) return
         model = model.copy(showLoader = true, hideLoader = false)
-        callback.publish(model)
-        searchFlickr(model.query, model.page, callback)
+        publisher.publish(model)
+        searchFlickr(model.query, model.page, publisher)
     }
 
     companion object {

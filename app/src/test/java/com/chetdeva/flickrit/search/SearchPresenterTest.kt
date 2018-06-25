@@ -2,11 +2,10 @@ package com.chetdeva.flickrit.search
 
 import com.chetdeva.flickrit.capture
 import com.chetdeva.flickrit.network.ImageClient
-import com.chetdeva.flickrit.search.SearchContract.Interactor.Callback
+import com.chetdeva.flickrit.util.Publisher
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.Mock
@@ -22,16 +21,14 @@ class SearchPresenterTest {
     private lateinit var presenter: SearchContract.Presenter
 
     @Mock
-    lateinit var interactor: SearchContract.Interactor
+    private lateinit var interactor: SearchContract.Interactor
     @Mock
-    lateinit var imageClient: ImageClient
+    private lateinit var imageClient: ImageClient
     @Mock
-    lateinit var view: SearchContract.View
+    private lateinit var view: SearchContract.View
 
     @Captor
-    private lateinit var argumentCaptor: ArgumentCaptor<Callback>
-
-    private val searchModel = SearchModel.Init
+    private lateinit var argumentCaptor: ArgumentCaptor<Publisher<SearchModel>>
 
     @Before
     fun setUp() {
@@ -41,16 +38,32 @@ class SearchPresenterTest {
 
     @Test
     fun testCreatePresenter() {
+        // when
         presenter = SearchPresenter(interactor, imageClient, view)
 
+        // then
         verify(view).presenter = presenter
     }
 
     @Test
     fun testSearch() {
+        // when
         presenter.search("abc")
 
+        // then
         verify(interactor).search(anyString(), capture(argumentCaptor))
+        argumentCaptor.value.publish(SearchModel.Init)
+
+        verify(view).render(SearchState.Init)
+    }
+
+    @Test
+    fun testNextPage() {
+        // when
+        presenter.loadNextPage()
+
+        // then
+        verify(interactor).nextPage(capture(argumentCaptor))
         argumentCaptor.value.publish(SearchModel.Init)
 
         verify(view).render(SearchState.Init)
