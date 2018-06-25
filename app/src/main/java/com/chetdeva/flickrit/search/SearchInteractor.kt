@@ -60,7 +60,8 @@ class SearchInteractor(
                     showLoader = false,
                     hideLoader = true,
                     photos = photos,
-                    page = model.page + 1)
+                    page = model.page + 1,
+                    error = "")
             publisher.publish(model)
         } else {
             onSearchError(NO_MORE_ITEMS_ERROR, publisher)
@@ -85,7 +86,8 @@ class SearchInteractor(
         model = model.copy(
                 refresh = false,
                 showLoader = true,
-                hideLoader = false)
+                hideLoader = false,
+                error = "")
         publisher.publish(model)
         searchFlickr(model.query, model.page, publisher)
     }

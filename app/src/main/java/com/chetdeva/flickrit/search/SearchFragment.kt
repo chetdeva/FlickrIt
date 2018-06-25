@@ -11,6 +11,7 @@ import android.view.*
 import android.widget.TextView
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.chetdeva.flickrit.util.extension.*
@@ -68,11 +69,11 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.setHasFixedSize(true)
         adapter = SearchResultsAdapter(presenter)
         results.adapter = adapter
-        addScrollCallback(layoutManager)
+        addScrollCallback(layoutManager, VISIBLE_THRESHOLD)
     }
 
-    private fun addScrollCallback(layoutManager: GridLayoutManager) {
-        infiniteScrollListener = object : InfiniteScrollListener(layoutManager) {
+    private fun addScrollCallback(gridLayoutManager: GridLayoutManager, visibleThreshold: Int) {
+        infiniteScrollListener = object : InfiniteScrollListener(gridLayoutManager, visibleThreshold) {
             override fun onLoadMore() {
                 presenter.loadNextPage()
             }
@@ -102,18 +103,15 @@ class SearchFragment : Fragment(), SearchContract.View {
             showScreenLoader()
             return
         }
-        if (state.error.isNotBlank()) {
-            hideScreenLoaderIfShown()
-            showError(state.error)
-        }
         if (state.showLoader) {
-            infiniteScrollListener?.isDataLoading = true
             showLoaderAndUpdate(state.photos)
         }
         if (state.hideLoader) {
-            infiniteScrollListener?.isDataLoading = false
             hideScreenLoaderIfShown()
             hideLoaderAndUpdate(state.photos)
+        }
+        if (state.error.isNotBlank()) {
+            showError(state.error)
         }
     }
 

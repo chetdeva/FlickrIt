@@ -23,22 +23,21 @@ import android.support.v7.widget.RecyclerView
  * Adapted from https://gist.github.com/ssinss/e06f12ef66c51252563e
  */
 abstract class InfiniteScrollListener(
-        private val layoutManager: LinearLayoutManager
+        private val layoutManager: LinearLayoutManager,
+        private val visibleThreshold: Int = VISIBLE_THRESHOLD
 ) : RecyclerView.OnScrollListener() {
-
-    var isDataLoading: Boolean = false
 
     private val loadMoreRunnable = Runnable { onLoadMore() }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
         // bail out if scrolling upward or already loading data
-        if (dy < 0 || isDataLoading) return
+        if (dy < 0) return
 
         val visibleItemCount = recyclerView.childCount
         val totalItemCount = layoutManager.itemCount
         val firstVisibleItem = layoutManager.findFirstVisibleItemPosition()
 
-        if (totalItemCount - visibleItemCount <= firstVisibleItem + VISIBLE_THRESHOLD) {
+        if (totalItemCount - visibleItemCount <= firstVisibleItem + visibleThreshold) {
             recyclerView.post(loadMoreRunnable)
         }
     }
@@ -47,6 +46,6 @@ abstract class InfiniteScrollListener(
 
     companion object {
         // The minimum number of items remaining before we should loading more.
-        private const val VISIBLE_THRESHOLD = 9
+        private const val VISIBLE_THRESHOLD = 5
     }
 }

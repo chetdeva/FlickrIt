@@ -28,7 +28,7 @@ class SearchPresenterTest {
     private lateinit var view: SearchContract.View
 
     @Captor
-    private lateinit var modelCaptor: ArgumentCaptor<Publisher<SearchModel>>
+    private lateinit var publisher: ArgumentCaptor<Publisher<SearchModel>>
 
     @Before
     fun setUp() {
@@ -46,13 +46,25 @@ class SearchPresenterTest {
     }
 
     @Test
+    fun testRefreshState() {
+        // when
+        presenter.search("abc")
+
+        // then
+        verify(interactor).search(anyString(), capture(publisher))
+        publisher.value.publish(SearchModel.Init.copy(refresh = true))
+
+        verify(view).render(SearchState.Init.copy(refresh = true))
+    }
+
+    @Test
     fun testSearch() {
         // when
         presenter.search("abc")
 
         // then
-        verify(interactor).search(anyString(), capture(modelCaptor))
-        modelCaptor.value.publish(SearchModel.Init)
+        verify(interactor).search(anyString(), capture(publisher))
+        publisher.value.publish(SearchModel.Init)
 
         verify(view).render(SearchState.Init)
     }
@@ -63,8 +75,8 @@ class SearchPresenterTest {
         presenter.loadNextPage()
 
         // then
-        verify(interactor).nextPage(capture(modelCaptor))
-        modelCaptor.value.publish(SearchModel.Init)
+        verify(interactor).nextPage(capture(publisher))
+        publisher.value.publish(SearchModel.Init)
 
         verify(view).render(SearchState.Init)
     }

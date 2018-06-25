@@ -3,7 +3,6 @@ package com.chetdeva.flickrit.search
 import com.chetdeva.flickrit.SingleExecutors
 import com.chetdeva.flickrit.argumentCaptor
 import com.chetdeva.flickrit.capture
-import com.chetdeva.flickrit.captureValue
 import com.chetdeva.flickrit.network.FlickrApiService
 import com.chetdeva.flickrit.network.dto.SearchResultDto
 import com.chetdeva.flickrit.network.entities.SearchResponse
@@ -12,10 +11,10 @@ import com.chetdeva.flickrit.util.NetworkResult
 import com.chetdeva.flickrit.util.Publisher
 import org.junit.Before
 import org.junit.Test
-import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+
 
 /**
  * @author chetansachdeva
