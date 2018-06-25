@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.chetdeva.flickrit
 
-package com.chetdeva.flickrit.util
-
-import android.os.Handler
-import android.os.Looper
-import java.util.concurrent.Executors
-
-private val IO_EXECUTOR = Executors.newSingleThreadExecutor()
-private val handler = Handler(Looper.getMainLooper())
+import com.chetdeva.flickrit.util.executor.AppExecutors
+import java.util.concurrent.Executor
 
 /**
- * Utility method to run blocks on a dedicated background thread, used for io/database work.
+ * Allow instant execution of tasks.
  */
-fun ioThread(f : () -> Unit) {
-    IO_EXECUTOR.execute(f)
-}
-
-fun mainThread(f : () -> Unit) {
-    handler.post(f)
+class SingleExecutors : AppExecutors(instant, instant, instant) {
+    companion object {
+        private val instant = Executor { command -> command.run() }
+    }
 }

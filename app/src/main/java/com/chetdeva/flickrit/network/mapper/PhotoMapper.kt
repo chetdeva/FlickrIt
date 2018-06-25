@@ -17,7 +17,7 @@ class PhotoMapper(
     override fun mapFromEntity(photo: Photo): PhotoDto {
         return PhotoDto(id = photo.id ?: "",
                 title = photo.title ?: "",
-                url = urlFactory.create(photo) ?: "")
+                url = urlFactory.createUrl(photo) ?: "")
     }
 
     override fun mapToEntity(dto: PhotoDto): Photo {

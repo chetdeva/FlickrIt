@@ -1,12 +1,10 @@
 package com.chetdeva.flickrit.network
 
-import android.graphics.Bitmap
 import com.chetdeva.flickrit.BuildConfig
-import com.chetdeva.flickrit.util.extension.fromJson
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.search.SearchInteractor
-import com.chetdeva.flickrit.util.image.DownloadImageTask
-import com.chetdeva.flickrit.util.ioThread
+import com.chetdeva.flickrit.util.NetworkResult
+import com.chetdeva.flickrit.util.extension.fromJson
 import com.example.android.architecture.blueprints.todoapp.util.SingletonHolderDoubleArg
 import com.google.gson.Gson
 import java.util.*
@@ -21,8 +19,7 @@ class FlickrApiService(private val apiClient: ApiClient,
 
     fun search(query: String,
                page: Int,
-               onSuccess: (SearchResponse) -> Unit,
-               onError: (String) -> Unit) = ioThread {
+               onResult: (NetworkResult<SearchResponse>) -> Unit) {
 
         val params = getDefaultParams()
         params["text"] = query
@@ -32,9 +29,12 @@ class FlickrApiService(private val apiClient: ApiClient,
 
         val request = ApiClient.request(baseUrl = FLICKR_API_BASE_URL, params = params)
 
-        apiClient.asyncRequest(request, {
-            onSuccess(gson.fromJson(it.string()))
-        }, onError)
+        apiClient.asyncRequest(request, { response ->
+            val searchResponse = gson.fromJson<SearchResponse>(response.string())
+            onResult(NetworkResult.Success(searchResponse))
+        }, { error ->
+            onResult(NetworkResult.Error(error))
+        })
     }
 
     companion object : SingletonHolderDoubleArg<FlickrApiService, ApiClient, Gson>(::FlickrApiService) {
