@@ -1,7 +1,7 @@
 package com.chetdeva.flickrit.search
 
 import android.graphics.Bitmap
-import com.chetdeva.flickrit.network.ImageClient
+import com.chetdeva.flickrit.network.ImageService
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.util.Publisher
 
@@ -11,7 +11,7 @@ import com.chetdeva.flickrit.util.Publisher
 
 class SearchPresenter(
         private val interactor: SearchContract.Interactor,
-        private val imageClient: ImageClient,
+        private val imageService: ImageService,
         private val view: SearchContract.View
 ) : SearchContract.Presenter {
 
@@ -46,8 +46,8 @@ class SearchPresenter(
                 error = model.error)
     }
 
-    override fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
-        return imageClient.downloadImage(url, onDownloadComplete)
+    override fun loadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
+        return imageService.downloadImage(url, onDownloadComplete)
     }
 
     override fun onResultClicked(photo: PhotoDto) {

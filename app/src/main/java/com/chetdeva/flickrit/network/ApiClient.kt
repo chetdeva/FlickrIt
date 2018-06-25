@@ -3,6 +3,9 @@ package com.chetdeva.flickrit.network
 import com.example.android.architecture.blueprints.todoapp.util.SingletonHolderSingleArg
 import okhttp3.*
 import java.io.IOException
+import java.net.ConnectException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 /**
  * @author chetansachdeva
@@ -24,7 +27,7 @@ class ApiClient(private val client: OkHttpClient) {
             }
 
             override fun onFailure(call: Call, e: IOException?) {
-                onError(e?.localizedMessage ?: "")
+                onError(resolveException(e))
             }
         })
     }
@@ -34,6 +37,10 @@ class ApiClient(private val client: OkHttpClient) {
     }
 
     companion object : SingletonHolderSingleArg<ApiClient, OkHttpClient>(::ApiClient) {
+
+        private val NO_INTERNET_MESSAGE = "No internet connection."
+        private val REMOTE_SERVER_FAILED_MESSAGE = "Application server could not respond."
+        private val UNEXPECTED_ERROR_OCCURRED = "Something went wrong."
 
         fun request(baseUrl: String,
                     path: String = "",
@@ -47,7 +54,9 @@ class ApiClient(private val client: OkHttpClient) {
 
         private fun buildUrl(baseUrl: String, path: String, params: Map<String, String>): HttpUrl {
             val urlBuilder = HttpUrl.parse(baseUrl)!!.newBuilder()
-            if (path.isNotBlank()) { urlBuilder.addPathSegment(path) }
+            if (path.isNotBlank()) {
+                urlBuilder.addPathSegment(path)
+            }
             params.map { urlBuilder.addQueryParameter(it.key, it.value) }
             return urlBuilder.build()
         }
@@ -60,5 +69,13 @@ class ApiClient(private val client: OkHttpClient) {
                     .build()
         }
 
+        fun resolveException(cause: Exception?): String {
+            return when (cause) {
+                is UnknownHostException -> NO_INTERNET_MESSAGE
+                is SocketTimeoutException -> REMOTE_SERVER_FAILED_MESSAGE
+                is ConnectException -> NO_INTERNET_MESSAGE
+                else -> UNEXPECTED_ERROR_OCCURRED
+            }
+        }
     }
 }

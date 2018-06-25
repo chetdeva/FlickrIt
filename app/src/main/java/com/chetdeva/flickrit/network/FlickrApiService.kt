@@ -1,6 +1,5 @@
 package com.chetdeva.flickrit.network
 
-import com.chetdeva.flickrit.BuildConfig
 import com.chetdeva.flickrit.network.entities.SearchResponse
 import com.chetdeva.flickrit.search.SearchInteractor
 import com.chetdeva.flickrit.util.NetworkResult
@@ -39,7 +38,7 @@ class FlickrApiService(private val apiClient: ApiClient,
 
     companion object : SingletonHolderDoubleArg<FlickrApiService, ApiClient, Gson>(::FlickrApiService) {
 
-        private const val FLICKR_API_KEY: String = BuildConfig.FLICKR_API_KEY
+        private const val FLICKR_API_KEY: String = "6dea34e991808ad909d861a07ffd223c"
         private const val FLICKR_API_BASE_URL: String = "https://api.flickr.com/services/rest"
         private const val SEARCH_PHOTOS_METHOD = "flickr.photos.search"
 

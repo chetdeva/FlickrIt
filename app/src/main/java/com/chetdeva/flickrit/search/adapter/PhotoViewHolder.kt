@@ -22,12 +22,9 @@ class PhotoViewHolder(
 
     fun bind(photo: PhotoDto) {
         title.text = photo.title
-        image.tag = photo.id
         image.setImageBitmap(null)
-        adapter.downloadImage(photo.url) {
-            if (image.tag == photo.id) {
-                image.setImageBitmap(it)
-            }
+        adapter.loadImage(photo.url) {
+            image.setImageBitmap(it)
         }
 
         itemView.setOnClickListener {

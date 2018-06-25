@@ -1,7 +1,7 @@
 package com.chetdeva.flickrit.search
 
 import com.chetdeva.flickrit.capture
-import com.chetdeva.flickrit.network.ImageClient
+import com.chetdeva.flickrit.network.ImageService
 import com.chetdeva.flickrit.util.Publisher
 import org.junit.Before
 import org.junit.Test
@@ -23,7 +23,7 @@ class SearchPresenterTest {
     @Mock
     private lateinit var interactor: SearchContract.Interactor
     @Mock
-    private lateinit var imageClient: ImageClient
+    private lateinit var imageService: ImageService
     @Mock
     private lateinit var view: SearchContract.View
 
@@ -33,13 +33,13 @@ class SearchPresenterTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        presenter = SearchPresenter(interactor, imageClient, view)
+        presenter = SearchPresenter(interactor, imageService, view)
     }
 
     @Test
     fun testCreatePresenter() {
         // when
-        presenter = SearchPresenter(interactor, imageClient, view)
+        presenter = SearchPresenter(interactor, imageService, view)
 
         // then
         verify(view).presenter = presenter

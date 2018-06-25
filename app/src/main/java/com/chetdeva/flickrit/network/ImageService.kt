@@ -7,7 +7,7 @@ import com.chetdeva.flickrit.util.image.DownloadImageTask
  * @author chetansachdeva
  */
 
-class ImageClient(
+class ImageService(
         private val apiClient: ApiClient
 ) {
     fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
