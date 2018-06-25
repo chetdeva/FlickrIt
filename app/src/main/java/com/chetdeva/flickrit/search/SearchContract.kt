@@ -19,8 +19,9 @@ interface SearchContract {
     }
 
     interface Interactor {
-        fun search(query: String, publish: (SearchModel) -> Unit)
-        fun nextPage(publish: (SearchModel) -> Unit)
+        fun subscribe(publisher: (SearchModel) -> Unit)
+        fun search(query: String)
+        fun nextPage()
     }
 
     interface Adapter {
