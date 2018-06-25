@@ -9,7 +9,6 @@ import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.*
 import android.widget.ProgressBar
-import com.chetdeva.flickrit.Injector
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.util.extension.showToast
 import com.chetdeva.flickrit.network.dto.PhotoDto
@@ -29,7 +28,8 @@ class SearchFragment : Fragment(), SearchContract.View {
     private lateinit var results: RecyclerView
     private lateinit var loader: ProgressBar
     private var searchView: SearchView? = null
-    private lateinit var presenter: SearchContract.Presenter
+
+    override lateinit var presenter: SearchContract.Presenter
 
     private val spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
         override fun getSpanSize(position: Int): Int {
@@ -53,23 +53,14 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setHasOptionsMenu(true)
-        injectDependencies()
-    }
-
-    private fun injectDependencies() {
-        val interactor = Injector.provideSearchInteractor()
-        val imageClient = Injector.provideImageClient()
-        presenter = SearchPresenter(interactor, imageClient, this)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
-        results = view.findViewById(R.id.results)
-        loader = view.findViewById(R.id.loader)
+        setHasOptionsMenu(true)
+        with(view) {
+            results = findViewById(R.id.results)
+            loader = findViewById(R.id.loader)
+        }
         setupList()
         return view
     }
@@ -96,9 +87,9 @@ class SearchFragment : Fragment(), SearchContract.View {
                 .build()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        search("kittens")
+    override fun onResume() {
+        super.onResume()
+        presenter.start()
     }
 
     private fun search(query: String) {
@@ -189,6 +180,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     companion object {
+        fun newInstance() = SearchFragment()
         private const val MAX_GRID_SPAN_COUNT = 3
     }
 }

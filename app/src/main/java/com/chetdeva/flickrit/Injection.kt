@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
  * @author chetansachdeva
  */
 
-object Injector {
+object Injection {
 
     private val okHttpClient by lazy { provideOkHttpClient() }
     private val gson by lazy { GsonBuilder().create() }

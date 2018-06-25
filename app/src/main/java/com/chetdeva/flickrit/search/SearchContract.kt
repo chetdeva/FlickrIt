@@ -1,6 +1,8 @@
 package com.chetdeva.flickrit.search
 
 import android.graphics.Bitmap
+import com.chetdeva.flickrit.mvp.BasePresenter
+import com.chetdeva.flickrit.mvp.BaseView
 import com.chetdeva.flickrit.network.dto.PhotoDto
 
 /**
@@ -9,11 +11,11 @@ import com.chetdeva.flickrit.network.dto.PhotoDto
 
 interface SearchContract {
 
-    interface View {
+    interface View : BaseView<Presenter> {
         fun render(state: SearchState)
     }
 
-    interface Presenter : Adapter {
+    interface Presenter : BasePresenter, Adapter {
         fun search(query: String)
         fun loadNextPage()
     }

@@ -14,6 +14,14 @@ class SearchPresenter(
         private val view: SearchContract.View
 ) : SearchContract.Presenter {
 
+    init {
+        view.presenter = this
+    }
+
+    override fun start() {
+        search("kittens")
+    }
+
     override fun search(query: String) {
         interactor.search(query) {
             view.render(searchState(it))
