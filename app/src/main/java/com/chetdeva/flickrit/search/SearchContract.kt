@@ -1,5 +1,6 @@
 package com.chetdeva.flickrit.search
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.chetdeva.flickrit.mvp.BasePresenter
 import com.chetdeva.flickrit.mvp.BaseView
@@ -27,7 +28,7 @@ interface SearchContract {
     }
 
     interface Adapter {
-        fun loadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit)
+        fun loadImage(context: Context, url: String, onLoadComplete: (Bitmap?) -> Unit)
         fun onPhotoClicked(photo: PhotoDto)
     }
 }

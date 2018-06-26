@@ -1,13 +1,15 @@
 package com.chetdeva.flickrit
 
+import android.content.Context
 import com.chetdeva.flickrit.network.ApiClient
 import com.chetdeva.flickrit.network.FlickrApiService
-import com.chetdeva.flickrit.network.ImageService
+import com.chetdeva.flickrit.network.ImageDownloader
 import com.chetdeva.flickrit.network.mapper.SearchMapper
 import com.chetdeva.flickrit.search.SearchContract
 import com.chetdeva.flickrit.search.SearchInteractor
 import com.chetdeva.flickrit.util.executor.AppExecutors
 import com.chetdeva.flickrit.util.executor.DiskIOThreadExecutor
+import com.chetdeva.flickrit.util.image.ImageBitmapLoader
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -24,14 +26,11 @@ import java.util.concurrent.TimeUnit
 
 object Injection {
 
+    private val imageOkHttpClient by lazy { OkHttpClient.Builder().build() }
     private val okHttpClient by lazy { okHttpClient() }
     private val gson by lazy { GsonBuilder().create() }
     private val searchMapper by lazy { SearchMapper() }
     private val appExecutors by lazy { AppExecutors(DiskIOThreadExecutor()) }
-
-    fun provideImageClient(): ImageService {
-        return ImageService(provideApiClient(okHttpClient))
-    }
 
     fun provideSearchInteractor(): SearchContract.Interactor {
         return SearchInteractor(provideFlickrApiService(okHttpClient, gson), appExecutors, searchMapper)
@@ -55,5 +54,13 @@ object Injection {
 
     private fun httpLoggingInterceptor(): HttpLoggingInterceptor {
         return HttpLoggingInterceptor().apply { level = BODY }
+    }
+
+    fun provideImageBitmapLoader(context: Context): ImageBitmapLoader {
+        return ImageBitmapLoader.getInstance(context, appExecutors)
+    }
+
+    fun provideImageDownloader(): ImageDownloader {
+        return ImageDownloader(provideApiClient(imageOkHttpClient))
     }
 }

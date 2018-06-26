@@ -1,7 +1,7 @@
 package com.chetdeva.flickrit.network
 
 import android.graphics.Bitmap
-import com.chetdeva.flickrit.util.image.DownloadImageTask
+import com.chetdeva.flickrit.util.image.ImageDownloadTask
 
 /**
  * manages [Bitmap] images
@@ -9,7 +9,7 @@ import com.chetdeva.flickrit.util.image.DownloadImageTask
  * @author chetansachdeva
  */
 
-class ImageService(
+class ImageDownloader(
         private val apiClient: ApiClient
 ) {
     /**
@@ -17,6 +17,6 @@ class ImageService(
      * publish callback as a [Bitmap]
      */
     fun downloadImage(url: String, onDownloadComplete: (Bitmap?) -> Unit) {
-        DownloadImageTask(apiClient, onDownloadComplete).execute(url)
+        ImageDownloadTask(apiClient, onDownloadComplete).execute(url)
     }
 }
