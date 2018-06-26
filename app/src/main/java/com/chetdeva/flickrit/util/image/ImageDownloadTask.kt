@@ -8,10 +8,12 @@ import okhttp3.Response
 import java.io.IOException
 
 /**
+ * downloads image from [ApiClient]
+ *
  * @author chetansachdeva
  */
 
-class DownloadImageTask(
+class ImageDownloadTask(
         private val apiClient: ApiClient,
         private val onDownloadComplete: (Bitmap?) -> Unit
 ) : AsyncTask<String, Unit, Bitmap?>() {

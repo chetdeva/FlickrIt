@@ -56,8 +56,12 @@ class MainActivity : AppCompatActivity() {
      */
     private fun inject(searchFragment: SearchFragment) {
         val interactor = Injection.provideSearchInteractor()
-        val imageClient = Injection.provideImageClient()
-        searchPresenter = SearchPresenter(interactor, imageClient, searchFragment)
+        val photoLoader = Injection.provideImageBitmapLoader(this)
+        searchPresenter = SearchPresenter(interactor, photoLoader, searchFragment)
     }
 
+    override fun onDestroy() {
+        Injection.provideImageBitmapLoader(this).clearCache()
+        super.onDestroy()
+    }
 }
