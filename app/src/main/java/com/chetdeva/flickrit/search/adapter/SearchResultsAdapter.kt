@@ -6,13 +6,15 @@ import android.support.v7.widget.RecyclerView
 import android.view.ViewGroup
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
+import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
 
 /**
  * @author chetansachdeva
  */
 
 class SearchResultsAdapter(
-        private val adapter: SearchContract.Adapter
+        private val adapter: SearchContract.Adapter,
+        private val imageFetcher: ImageFetcher
 ) : ListAdapter<PhotoDto?, RecyclerView.ViewHolder>(DIFF_CALLBACK) {
 
     override fun getItemViewType(position: Int): Int {
@@ -27,7 +29,7 @@ class SearchResultsAdapter(
         return if (viewType == ProgressViewHolder.VIEW_TYPE) {
             ProgressViewHolder.create(parent)
         } else {
-            PhotoViewHolder.create(parent, adapter)
+            PhotoViewHolder.create(parent, imageFetcher, adapter)
         }
     }
 

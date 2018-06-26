@@ -1,11 +1,7 @@
 package com.chetdeva.flickrit.search
 
-import android.content.Context
-import android.graphics.Bitmap
-import com.chetdeva.flickrit.network.ImageDownloader
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.util.Publisher
-import com.chetdeva.flickrit.util.image.ImageBitmapLoader
 
 /**
  * @author chetansachdeva
@@ -13,7 +9,6 @@ import com.chetdeva.flickrit.util.image.ImageBitmapLoader
 
 class SearchPresenter(
         private val interactor: SearchContract.Interactor,
-        private val bitmapLoader: ImageBitmapLoader,
         private val view: SearchContract.View
 ) : SearchContract.Presenter {
 
@@ -49,13 +44,6 @@ class SearchPresenter(
      */
     override fun loadNextPage() {
         interactor.nextPage(publisher)
-    }
-
-    /**
-     * loadImageBitmap image from [ImageDownloader]
-     */
-    override fun loadImage(context: Context, url: String, onLoadComplete: (Bitmap?) -> Unit) {
-        return bitmapLoader.loadImageBitmap(url, onLoadComplete)
     }
 
     /**

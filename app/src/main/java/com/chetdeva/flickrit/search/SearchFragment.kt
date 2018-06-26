@@ -9,12 +9,14 @@ import android.support.v7.widget.SearchView
 import android.util.Log
 import android.view.*
 import android.widget.TextView
+import com.chetdeva.flickrit.Injection
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.chetdeva.flickrit.util.extension.*
+import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
 import com.chetdeva.flickrit.util.recyclerview.InfiniteScrollListener
 
 
@@ -24,6 +26,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     private lateinit var results: RecyclerView
     private lateinit var searching: TextView
     private var searchView: SearchView? = null
+    private lateinit var imageFetcher: ImageFetcher
 
     private var infiniteScrollListener: InfiniteScrollListener? = null
 
@@ -68,6 +71,7 @@ class SearchFragment : Fragment(), SearchContract.View {
             results = findViewById(R.id.results)
             searching = findViewById(R.id.searching)
         }
+        imageFetcher = Injection.provideImageFetcher(activity!!)
         setupList()
         return view
     }
@@ -81,7 +85,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         results.layoutManager = layoutManager
         results.setHasFixedSize(true)
-        adapter = SearchResultsAdapter(presenter)
+        adapter = SearchResultsAdapter(presenter, imageFetcher)
         results.adapter = adapter
         addScrollCallback(layoutManager, VISIBLE_THRESHOLD)
     }
@@ -208,10 +212,19 @@ class SearchFragment : Fragment(), SearchContract.View {
     override fun onResume() {
         super.onResume()
         presenter.start()
+        imageFetcher.setExitTasksEarly(false)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        imageFetcher.setPauseWork(false)
+        imageFetcher.setExitTasksEarly(true)
+        imageFetcher.flushCache()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        imageFetcher.closeCache()
         onQueryTextListener = null
         infiniteScrollListener = null
     }
