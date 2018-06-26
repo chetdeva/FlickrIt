@@ -21,18 +21,19 @@ class ImageDownloadTask(
     override fun doInBackground(vararg params: String): Bitmap? {
         val request = ApiClient.buildRequest(params.first())
 
-        val response = try {
-            apiClient.syncRequest(request)
+        return try {
+            val response = apiClient.syncRequest(request)
+            decodeBitmap(response)
         } catch (e: IOException) {
             e.printStackTrace()
             null
         }
-
-        return decodeBitmap(response)
     }
 
     private fun decodeBitmap(response: Response?): Bitmap? {
-        return BitmapFactory.decodeStream(response?.body()?.byteStream())
+        return response?.body()?.let {
+            BitmapFactory.decodeStream(it.byteStream())
+        }
     }
 
     override fun onPostExecute(result: Bitmap?) {
