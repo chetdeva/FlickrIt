@@ -145,7 +145,7 @@ class SearchFragment : Fragment(), SearchContract.View {
      * hide keyboard from the screen
      */
     private fun hideKeyboard() {
-        searchView?.clearFocus() ?: activity?.hideKeyboard()
+        if (searchView?.hasFocus() == true) searchView?.clearFocus()
     }
 
     /**
