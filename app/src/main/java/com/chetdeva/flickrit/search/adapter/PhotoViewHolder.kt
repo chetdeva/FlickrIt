@@ -27,8 +27,6 @@ class PhotoViewHolder(
         adapter.loadImage(itemView.context, photo.url) {
             if (photo.id == image.tag) {
                 image.setImageBitmap(it)
-            } else {
-                image.setImageBitmap(null)
             }
         }
 

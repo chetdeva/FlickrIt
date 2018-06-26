@@ -37,5 +37,4 @@ class MemoryBitmapCache : BitmapCache {
         val CACHE_SIZE_BYTES: Int = (Runtime.getRuntime().maxMemory() / 1024).toInt()
         val instance: MemoryBitmapCache by lazy { MemoryBitmapCache() }
     }
-
 }
