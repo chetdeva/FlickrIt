@@ -26,23 +26,11 @@ import java.util.concurrent.TimeUnit
 
 object Injection {
 
-    private val imageOkHttpClient by lazy { OkHttpClient.Builder().build() }
     private val okHttpClient by lazy { okHttpClient() }
     private val gson by lazy { GsonBuilder().create() }
     private val searchMapper by lazy { SearchMapper() }
     private val appExecutors by lazy { AppExecutors(DiskIOThreadExecutor()) }
-
-    fun provideSearchInteractor(): SearchContract.Interactor {
-        return SearchInteractor(provideFlickrApiService(okHttpClient, gson), appExecutors, searchMapper)
-    }
-
-    private fun provideFlickrApiService(client: OkHttpClient, gson: Gson): FlickrApiService {
-        return FlickrApiService.getInstance(provideApiClient(client), gson)
-    }
-
-    private fun provideApiClient(client: OkHttpClient): ApiClient {
-        return ApiClient.getInstance(client)
-    }
+    private val imageApiClient by lazy { imageApiClient() }
 
     private fun okHttpClient(): OkHttpClient {
         val logging = httpLoggingInterceptor()
@@ -56,11 +44,28 @@ object Injection {
         return HttpLoggingInterceptor().apply { level = BODY }
     }
 
+    private fun imageApiClient(): ApiClient {
+        val imageOkHttpClient = OkHttpClient.Builder().build()
+        return ApiClient(imageOkHttpClient)
+    }
+
+    fun provideSearchInteractor(): SearchContract.Interactor {
+        return SearchInteractor(provideFlickrApiService(okHttpClient, gson), appExecutors, searchMapper)
+    }
+
+    private fun provideFlickrApiService(client: OkHttpClient, gson: Gson): FlickrApiService {
+        return FlickrApiService.getInstance(provideApiClient(client), gson)
+    }
+
+    private fun provideApiClient(client: OkHttpClient): ApiClient {
+        return ApiClient.getInstance(client)
+    }
+
     fun provideImageBitmapLoader(context: Context): ImageBitmapLoader {
         return ImageBitmapLoader.getInstance(context, appExecutors)
     }
 
     fun provideImageDownloader(): ImageDownloader {
-        return ImageDownloader(provideApiClient(imageOkHttpClient))
+        return ImageDownloader.getInstance(imageApiClient)
     }
 }

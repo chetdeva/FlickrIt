@@ -18,11 +18,9 @@ class ImageBitmapLoader(private val memoryCache: BitmapCache,
 ) {
 
     fun loadImageBitmap(url: String, onLoadComplete: (Bitmap?) -> Unit) {
-        executors.diskIO.execute {
-            loadCachedOrDownload(url) { bitmap ->
-                executors.UI.execute {
-                    onLoadComplete(bitmap)
-                }
+        loadCachedOrDownload(url) { bitmap ->
+            executors.UI.execute {
+                onLoadComplete(bitmap)
             }
         }
     }
@@ -35,23 +33,29 @@ class ImageBitmapLoader(private val memoryCache: BitmapCache,
         Log.d(TAG, "Loading image url: $url")
 
         // check memory cache and return bitmap if found
-        val memoryCacheBitmap = loadFromCache(url, memoryCache)
-        if (memoryCacheBitmap != null) {
-            onLoadComplete(memoryCacheBitmap)
-        }
 
-        // check disk, save to memory cache and return bitmap if found
-        val diskCacheBitmap = loadFromCache(url, diskCache)
-        if (diskCacheBitmap != null) {
-            saveToCache(url, memoryCacheBitmap, memoryCache)
-            onLoadComplete(diskCacheBitmap)
+        executors.diskIO.execute {
+            val memoryCacheBitmap = loadFromCache(url, memoryCache)
+            if (memoryCacheBitmap != null) {
+                onLoadComplete(memoryCacheBitmap)
+            }
+
+            // check disk, save to memory cache and return bitmap if found
+            val diskCacheBitmap = loadFromCache(url, diskCache)
+            if (diskCacheBitmap != null) {
+                saveToCache(url, memoryCacheBitmap, memoryCache)
+                onLoadComplete(diskCacheBitmap)
+            }
         }
 
         // download, save to memory and disk cache and return bitmap
-        downloader.downloadImage(url) { bitmap ->
-            saveToCache(url, bitmap, diskCache)
-            saveToCache(url, bitmap, memoryCache)
-            onLoadComplete(bitmap)
+
+        executors.networkIO.execute {
+            downloader.downloadImage(url) { bitmap ->
+                saveToCache(url, bitmap, diskCache)
+                saveToCache(url, bitmap, memoryCache)
+                onLoadComplete(bitmap)
+            }
         }
     }
 
