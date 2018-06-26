@@ -43,7 +43,7 @@ fun AppCompatActivity.addFragmentToActivity(fragment: Fragment, tag: String) {
     }
 }
 
-fun AppCompatActivity.setupActionBar(@IdRes toolbarId: Int, action: ActionBar.() -> Unit) {
+fun AppCompatActivity.setupActionBar(@IdRes toolbarId: Int, action: ActionBar.() -> Unit = {}) {
     setSupportActionBar(findViewById(toolbarId))
     supportActionBar?.run {
         action()

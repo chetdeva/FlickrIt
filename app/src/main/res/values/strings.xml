@@ -3,4 +3,7 @@
     <string name="search">Search</string>
     <string name="item_photo_image_content_description">image</string>
     <string name="searching">Flickring it...</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
