@@ -32,10 +32,7 @@ FlickrIt is built on top of MVP architecture:
 
 ### Image Caching
 
-- The `ImageBitmapLoader` downloads and caches images using `MemoryBitmapCache` and `DiskBitmapCache` with given url.
-- First, it checks `MemoryBitmapCache` and returns `Bitmap` if found.
-- Second, it checks `DiskBitmapCache` and saves it in memory cache if found. Then, it returns the found `Bitmap`.
-- Third, if the Bitmap wasn't found in either memory or disk, it downloads the image using `ImageDownloader` . Then, it saves the `Bitmap` to both the caches and returns it.
+- `ImageFetcher` helps fetch image `Bitmap` from Memory, Disk or Network (whichever is available first).
 
 Thanks for stopping by! Have a great day :)
 

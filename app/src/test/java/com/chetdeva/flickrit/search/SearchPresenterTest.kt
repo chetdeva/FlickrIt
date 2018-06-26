@@ -2,7 +2,6 @@ package com.chetdeva.flickrit.search
 
 import com.chetdeva.flickrit.capture
 import com.chetdeva.flickrit.util.Publisher
-import com.chetdeva.flickrit.util.image.ImageBitmapLoader
 import org.junit.Before
 import org.junit.Test
 import org.mockito.ArgumentCaptor
@@ -23,8 +22,6 @@ class SearchPresenterTest {
     @Mock
     private lateinit var interactor: SearchContract.Interactor
     @Mock
-    private lateinit var bitmapLoader: ImageBitmapLoader
-    @Mock
     private lateinit var view: SearchContract.View
 
     @Captor
@@ -33,13 +30,13 @@ class SearchPresenterTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        presenter = SearchPresenter(interactor, bitmapLoader, view)
+        presenter = SearchPresenter(interactor, view)
     }
 
     @Test
     fun testCreatePresenter() {
         // when
-        presenter = SearchPresenter(interactor, bitmapLoader, view)
+        presenter = SearchPresenter(interactor, view)
 
         // then
         verify(view).presenter = presenter

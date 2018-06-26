@@ -6,4 +6,7 @@
     <dimen name="splash_text_size">32sp</dimen>
     <dimen name="searching_text_size">18sp</dimen>
     <dimen name="flickr_logo_size">240dp</dimen>
+    <dimen name="image_thumbnail_size">100dp</dimen>
+    <dimen name="image_thumbnail_height">200dp</dimen>
+    <dimen name="image_thumbnail_spacing">10dp</dimen>
 </resources>

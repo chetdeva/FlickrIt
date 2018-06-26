@@ -9,10 +9,11 @@ import android.widget.TextView
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
+import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
 
-class PhotoViewHolder(
-        itemView: View,
-        private val adapter: SearchContract.Adapter
+class PhotoViewHolder(itemView: View,
+                      private val imageFetcher: ImageFetcher,
+                      private val adapter: SearchContract.Adapter
 ) : RecyclerView.ViewHolder(itemView) {
 
     private val title: TextView
@@ -22,13 +23,7 @@ class PhotoViewHolder(
 
     fun bind(photo: PhotoDto) {
         title.text = photo.title
-        image.tag = photo.id
-        image.setImageBitmap(null)
-        adapter.loadImage(itemView.context, photo.url) {
-            if (photo.id == image.tag) {
-                image.setImageBitmap(it)
-            }
-        }
+        imageFetcher.loadImage(photo.url, image)
 
         itemView.setOnClickListener {
             adapter.onPhotoClicked(photo)
@@ -36,10 +31,10 @@ class PhotoViewHolder(
     }
 
     companion object {
-        fun create(parent: ViewGroup, presenter: SearchContract.Adapter): PhotoViewHolder {
+        fun create(parent: ViewGroup, imageFetcher: ImageFetcher, presenter: SearchContract.Adapter): PhotoViewHolder {
             val inflater = LayoutInflater.from(parent.context)
             val itemView = inflater.inflate(R.layout.item_photo, parent, false)
-            return PhotoViewHolder(itemView, presenter)
+            return PhotoViewHolder(itemView, imageFetcher, presenter)
         }
     }
 }

@@ -1,15 +1,15 @@
 package com.chetdeva.flickrit
 
-import android.content.Context
+import android.support.v4.app.FragmentActivity
 import com.chetdeva.flickrit.network.ApiClient
 import com.chetdeva.flickrit.network.FlickrApiService
-import com.chetdeva.flickrit.network.ImageDownloader
 import com.chetdeva.flickrit.network.mapper.SearchMapper
 import com.chetdeva.flickrit.search.SearchContract
 import com.chetdeva.flickrit.search.SearchInteractor
 import com.chetdeva.flickrit.util.executor.AppExecutors
 import com.chetdeva.flickrit.util.executor.DiskIOThreadExecutor
-import com.chetdeva.flickrit.util.image.ImageBitmapLoader
+import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
+import com.chetdeva.flickrit.util.imagefetcher.ImageFetcherHelper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -30,7 +30,6 @@ object Injection {
     private val gson by lazy { GsonBuilder().create() }
     private val searchMapper by lazy { SearchMapper() }
     private val appExecutors by lazy { AppExecutors(DiskIOThreadExecutor()) }
-    private val imageApiClient by lazy { imageApiClient() }
 
     private fun okHttpClient(): OkHttpClient {
         val logging = httpLoggingInterceptor()
@@ -61,11 +60,7 @@ object Injection {
         return ApiClient.getInstance(client)
     }
 
-    fun provideImageBitmapLoader(context: Context): ImageBitmapLoader {
-        return ImageBitmapLoader.getInstance(context, appExecutors)
-    }
-
-    fun provideImageDownloader(): ImageDownloader {
-        return ImageDownloader.getInstance(imageApiClient)
+    fun provideImageFetcher(activity: FragmentActivity): ImageFetcher {
+        return ImageFetcherHelper.getFlickrImageFetcher(activity)
     }
 }
