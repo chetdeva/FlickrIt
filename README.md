@@ -30,6 +30,13 @@ FlickrIt is built on top of MVP architecture:
 
 - Unit tests can be found under `test` package.
 
+### Image Caching
+
+- The `ImageBitmapLoader` caches images using `MemoryBitmapCache` and `DiskBitmapCache`.
+- First, it checks `MemoryBitmapCache` and returns the found `Bitmap`.
+- Second, it checks `DiskBitmapCache` and saves it in memory cache if found. Then, it returns the found `Bitmap`.
+- Third, it downloads the image if the Bitmap with url wasn't found in either memory or disk. Then, it saves the `Bitmap` in both the caches and returns it.
+
 Thanks for stopping by! Have a great day :)
 
 
