@@ -16,13 +16,17 @@ interface SearchContract {
     }
 
     interface Presenter : BasePresenter, Adapter {
+        var lastQuery: String
         fun search(query: String)
+        fun searchLastQuery()
         fun loadNextPage()
     }
 
     interface Interactor {
+        var lastQuery: String
         fun search(query: String, publisher: Publisher<SearchModel>)
         fun nextPage(publisher: Publisher<SearchModel>)
+        fun searchLastQuery(publisher: Publisher<SearchModel>)
     }
 
     interface Adapter {

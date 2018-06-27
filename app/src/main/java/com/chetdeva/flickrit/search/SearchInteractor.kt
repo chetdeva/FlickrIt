@@ -99,6 +99,18 @@ class SearchInteractor(
     }
 
     /**
+     * search last [query] text from model
+     * publish [SearchModel] via [publisher]
+     */
+    override fun searchLastQuery(publisher: Publisher<SearchModel>) {
+        if (model.query.isNotBlank()) {
+            search(model.query, publisher)
+        } else {
+            search(DEFAULT_SEARCH_QUERY, publisher)
+        }
+    }
+
+    /**
      * search next page with the previous query text held in [SearchModel]
      * publish [SearchModel] via [publisher]
      */
@@ -113,8 +125,15 @@ class SearchInteractor(
         searchFlickr(model.query, model.page, publisher)
     }
 
+    override var lastQuery: String
+        get() = model.query
+        set(value) {
+            model = model.copy(query = value)
+        }
+
     companion object {
         const val VISIBLE_THRESHOLD: Int = 9
+        const val DEFAULT_SEARCH_QUERY: String = "kittens"
         const val MAX_PAGE_SIZE: Int = 12
         const val TOO_SMALL_QUERY_ERROR = "Type at least 3 characters"
         const val NO_MORE_ITEMS_ERROR = "No more items found"

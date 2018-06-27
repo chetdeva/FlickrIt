@@ -43,11 +43,6 @@ object Injection {
         return HttpLoggingInterceptor().apply { level = BODY }
     }
 
-    private fun imageApiClient(): ApiClient {
-        val imageOkHttpClient = OkHttpClient.Builder().build()
-        return ApiClient(imageOkHttpClient)
-    }
-
     fun provideSearchInteractor(): SearchContract.Interactor {
         return SearchInteractor(provideFlickrApiService(okHttpClient, gson), appExecutors, searchMapper)
     }

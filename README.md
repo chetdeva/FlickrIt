@@ -9,6 +9,7 @@ FlickrIt lets you search images from Flickr API. It uses the Flickr API key.
 - By default the app loads search results for the query "kittens".
 - To search, you can use the `SearchView` inside the `Toolbar` on the top right corner.
 - The app also lets you scroll endlessly.
+- The user can swipe to refresh to reset/restart search.
 
 ### Architecture
 

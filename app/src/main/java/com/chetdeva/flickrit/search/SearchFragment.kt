@@ -2,6 +2,7 @@ package com.chetdeva.flickrit.search
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -12,6 +13,7 @@ import android.widget.TextView
 import com.chetdeva.flickrit.Injection
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
+import com.chetdeva.flickrit.search.SearchInteractor.Companion.DEFAULT_SEARCH_QUERY
 import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
@@ -23,6 +25,7 @@ import com.chetdeva.flickrit.util.recyclerview.InfiniteScrollListener
 class SearchFragment : Fragment(), SearchContract.View {
 
     private lateinit var adapter: SearchResultsAdapter
+    private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var results: RecyclerView
     private lateinit var searching: TextView
     private var searchView: SearchView? = null
@@ -67,27 +70,71 @@ class SearchFragment : Fragment(), SearchContract.View {
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
         setHasOptionsMenu(true)
+        setupView(view)
+        setupImageFetcher()
+        setupList()
+        setupSwipeToRefresh()
+        // get last query from savedInstanceState
+        val lastQuery = savedInstanceState?.getString(LAST_SEARCH_QUERY) ?: DEFAULT_SEARCH_QUERY
+        saveLastQueryAndSearch(lastQuery)
+        return view
+    }
+
+    /**
+     * save last query and perform search
+     */
+    private fun saveLastQueryAndSearch(lastQuery: String) {
+        presenter.lastQuery = lastQuery
+        presenter.searchLastQuery()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Log.i("saved statte:", presenter.lastQuery)
+        outState.putString(LAST_SEARCH_QUERY, presenter.lastQuery)
+    }
+
+    private fun setupImageFetcher() {
+        imageFetcher = Injection.provideImageFetcher(activity!!)
+    }
+
+    private fun setupView(view: View) {
         with(view) {
+            refreshLayout = findViewById(R.id.refresh_layout)
             results = findViewById(R.id.results)
             searching = findViewById(R.id.searching)
         }
-        imageFetcher = Injection.provideImageFetcher(activity!!)
-        setupList()
-        return view
+    }
+
+    /**
+     * setup [SwipeRefreshLayout] and register [OnRefreshListener]
+     */
+    private fun setupSwipeToRefresh() {
+        refreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark)
+        refreshLayout.setOnRefreshListener {
+            if (refreshLayout.isRefreshing) {
+                presenter.searchLastQuery()
+            }
+        }
     }
 
     /**
      * setup results with [SearchResultsAdapter] and register [InfiniteScrollListener] callback
      */
     private fun setupList() {
-        val layoutManager = GridLayoutManager(context, MAX_GRID_SPAN_COUNT)
-        layoutManager.spanSizeLookup = spanSizeLookup
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        val layoutManager = gridLayoutManager()
         results.layoutManager = layoutManager
         results.setHasFixedSize(true)
         adapter = SearchResultsAdapter(presenter, imageFetcher)
         results.adapter = adapter
         addScrollCallback(layoutManager, VISIBLE_THRESHOLD)
+    }
+
+    private fun gridLayoutManager(): GridLayoutManager {
+        val layoutManager = GridLayoutManager(context, MAX_GRID_SPAN_COUNT)
+        layoutManager.spanSizeLookup = spanSizeLookup
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        return layoutManager
     }
 
     private fun addScrollCallback(gridLayoutManager: GridLayoutManager, visibleThreshold: Int) {
@@ -123,6 +170,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         if (state.hideLoader) {
             hideScreenLoaderIfShown()
             hideLoaderAndUpdate(state.photos)
+            hideSwipeRefreshIfShown()
         }
         if (state.error.isNotBlank()) {
             showError(state.error)
@@ -163,9 +211,13 @@ class SearchFragment : Fragment(), SearchContract.View {
      * show loader at the bottom of the [PhotoDto] list and update it
      */
     private fun showLoaderAndUpdate(photos: List<PhotoDto?>) {
-        val list = photos.toMutableList()
-        list.add(null)
-        showList(list)
+        if (photos.isNotEmpty()) {
+            val list = photos.toMutableList()
+            list.add(null)
+            showList(list)
+        } else {
+            showList(photos)
+        }
     }
 
     /**
@@ -180,6 +232,12 @@ class SearchFragment : Fragment(), SearchContract.View {
      */
     private fun hideLoaderAndUpdate(photos: List<PhotoDto?>) {
         showList(photos)
+    }
+
+    fun hideSwipeRefreshIfShown() {
+        if (refreshLayout.isRefreshing) {
+            refreshLayout.isRefreshing = false
+        }
     }
 
     /**
@@ -231,6 +289,7 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     companion object {
         fun newInstance() = SearchFragment()
+        private const val LAST_SEARCH_QUERY: String = "last_search_query"
         private const val MAX_GRID_SPAN_COUNT = 3
     }
 }
