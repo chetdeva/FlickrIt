@@ -66,12 +66,16 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override lateinit var presenter: SearchContract.Presenter
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+        setupImageFetcher()
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
-        setHasOptionsMenu(true)
         setupView(view)
-        setupImageFetcher()
         setupList()
         setupSwipeToRefresh()
         // get last query from savedInstanceState
@@ -95,7 +99,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     private fun setupImageFetcher() {
-        imageFetcher = Injection.provideImageFetcher(activity!!)
+        imageFetcher = Injection.provideFlickrImageFetcher(activity!!)
     }
 
     private fun setupView(view: View) {
