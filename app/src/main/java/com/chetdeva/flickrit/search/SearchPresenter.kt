@@ -25,11 +25,7 @@ class SearchPresenter(
         }
     }
 
-    /**
-     * search for "kittens" on start
-     */
     override fun start() {
-        search("kittens")
     }
 
     /**
@@ -40,11 +36,24 @@ class SearchPresenter(
     }
 
     /**
+     * search Flickr for the last [query] text
+     */
+    override fun searchLastQuery() {
+        interactor.searchLastQuery(publisher)
+    }
+
+    /**
      * loadImageBitmap next page with the previous query text
      */
     override fun loadNextPage() {
         interactor.nextPage(publisher)
     }
+
+    override var lastQuery: String
+        get() = interactor.lastQuery
+        set(value) {
+            interactor.lastQuery = value
+        }
 
     /**
      * called when user taps on a [PhotoDto]
