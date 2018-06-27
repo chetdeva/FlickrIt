@@ -9,7 +9,7 @@ import com.chetdeva.flickrit.search.SearchInteractor
 import com.chetdeva.flickrit.util.executor.AppExecutors
 import com.chetdeva.flickrit.util.executor.DiskIOThreadExecutor
 import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
-import com.chetdeva.flickrit.util.imagefetcher.ImageFetcherHelper
+import com.chetdeva.flickrit.util.ImageFetcherHelper
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
@@ -55,7 +55,13 @@ object Injection {
         return ApiClient.getInstance(client)
     }
 
-    fun provideImageFetcher(activity: FragmentActivity): ImageFetcher {
-        return ImageFetcherHelper.getFlickrImageFetcher(activity)
+    fun provideFlickrImageFetcher(activity: FragmentActivity): ImageFetcher {
+        val params = ImageFetcherHelper.getFlickrImageFetcherParams(activity)
+
+        val imageFetcher = ImageFetcher.getInstance(activity, params.imageThumbWidth, params.imageThumbHeight)
+        imageFetcher.setLoadingImage(params.loadingImageRes)
+        imageFetcher.addImageCache(activity.supportFragmentManager, params.cacheParams)
+
+        return imageFetcher
     }
 }
