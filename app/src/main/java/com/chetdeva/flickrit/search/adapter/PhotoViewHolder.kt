@@ -9,6 +9,8 @@ import android.widget.TextView
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchContract
+import com.chetdeva.flickrit.util.extension.gone
+import com.chetdeva.flickrit.util.extension.visible
 import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
 
 class PhotoViewHolder(itemView: View,
@@ -22,8 +24,19 @@ class PhotoViewHolder(itemView: View,
         get() = itemView.findViewById(R.id.image)
 
     fun bind(photo: PhotoDto) {
-        title.text = photo.title
-        imageFetcher.loadImage(photo.url, image)
+        // set title
+        if (photo.title.isNotBlank()) {
+            title.visible()
+            title.text = photo.title
+        } else {
+            title.gone()
+        }
+        // set image
+        if (photo.url.isNotBlank()) {
+            imageFetcher.loadImage(photo.url, image)
+        } else {
+            image.setImageResource(R.drawable.ic_placeholder)
+        }
 
         itemView.setOnClickListener {
             adapter.onPhotoClicked(photo)

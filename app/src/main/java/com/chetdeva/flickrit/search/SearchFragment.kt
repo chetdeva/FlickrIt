@@ -94,7 +94,6 @@ class SearchFragment : Fragment(), SearchContract.View {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        Log.i("saved statte:", presenter.lastQuery)
         outState.putString(LAST_SEARCH_QUERY, presenter.lastQuery)
     }
 
