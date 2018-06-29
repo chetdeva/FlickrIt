@@ -82,8 +82,12 @@ class SearchInteractor(
     /**
      * update the [PhotoDto] list in [SearchModel]
      */
-    private fun updateList(photos: List<PhotoDto>): MutableList<PhotoDto> {
-        return model.photos.toMutableList().apply { addAll(photos) }
+    private fun updateList(photos: List<PhotoDto>): List<PhotoDto> {
+        return if (photos.isNotEmpty()) {
+            model.photos.toMutableList().apply { addAll(photos) }
+        } else {
+            model.photos
+        }
     }
 
     /**
@@ -96,18 +100,6 @@ class SearchInteractor(
                 hideLoader = true,
                 error = error)
         publisher.publish(model)
-    }
-
-    /**
-     * search last [query] text from model
-     * publish [SearchModel] via [publisher]
-     */
-    override fun searchLastQuery(publisher: Publisher<SearchModel>) {
-        if (model.query.isNotBlank()) {
-            search(model.query, publisher)
-        } else {
-            search(DEFAULT_SEARCH_QUERY, publisher)
-        }
     }
 
     /**
@@ -125,6 +117,21 @@ class SearchInteractor(
         searchFlickr(model.query, model.page, publisher)
     }
 
+    /**
+     * search last [query] text from model
+     * publish [SearchModel] via [publisher]
+     */
+    override fun searchLastQuery(publisher: Publisher<SearchModel>) {
+        if (model.query.isNotBlank()) {
+            search(model.query, publisher)
+        } else {
+            search(DEFAULT_SEARCH_QUERY, publisher)
+        }
+    }
+
+    /**
+     * get or set last query searched
+     */
     override var lastQuery: String
         get() = model.query
         set(value) {

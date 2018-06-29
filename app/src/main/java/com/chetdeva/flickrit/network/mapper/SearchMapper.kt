@@ -23,6 +23,6 @@ class SearchMapper(
     }
 
     override fun mapToEntity(dto: SearchResultDto): SearchResponse {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        throw UnsupportedOperationException("SearchMapper.mapToEntity not supported yet")
     }
 }

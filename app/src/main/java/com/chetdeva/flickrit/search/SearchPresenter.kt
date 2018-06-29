@@ -49,6 +49,9 @@ class SearchPresenter(
         interactor.nextPage(publisher)
     }
 
+    /**
+     * get or set last query search
+     */
     override var lastQuery: String
         get() = interactor.lastQuery
         set(value) {

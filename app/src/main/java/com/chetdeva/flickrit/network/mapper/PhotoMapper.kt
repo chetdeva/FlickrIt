@@ -23,6 +23,6 @@ class PhotoMapper(
     }
 
     override fun mapToEntity(dto: PhotoDto): Photo {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        throw UnsupportedOperationException("PhotoMapper.mapToEntity not supported yet")
     }
 }
