@@ -51,6 +51,7 @@ class SearchPresenterTest {
         verify(interactor).search(anyString(), capture(publisher))
         publisher.value.publish(SearchModel.Init.copy(refresh = true))
 
+        // then
         verify(view).render(SearchState.Init.copy(refresh = true))
     }
 
@@ -59,10 +60,10 @@ class SearchPresenterTest {
         // when
         presenter.search("abc")
 
-        // then
         verify(interactor).search(anyString(), capture(publisher))
         publisher.value.publish(SearchModel.Init)
 
+        // then
         verify(view).render(SearchState.Init)
     }
 
@@ -71,10 +72,10 @@ class SearchPresenterTest {
         // when
         presenter.loadNextPage()
 
-        // then
         verify(interactor).nextPage(capture(publisher))
         publisher.value.publish(SearchModel.Init)
 
+        // then
         verify(view).render(SearchState.Init)
     }
 }

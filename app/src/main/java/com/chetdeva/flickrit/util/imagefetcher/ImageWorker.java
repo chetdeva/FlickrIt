@@ -295,6 +295,7 @@ public abstract class ImageWorker {
                     try {
                         mPauseWorkLock.wait();
                     } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }

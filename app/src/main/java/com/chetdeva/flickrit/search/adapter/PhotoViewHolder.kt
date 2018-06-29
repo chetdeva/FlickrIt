@@ -37,7 +37,7 @@ class PhotoViewHolder(itemView: View,
         } else {
             image.setImageResource(R.drawable.ic_placeholder)
         }
-
+        // set item click listener
         itemView.setOnClickListener {
             adapter.onPhotoClicked(photo)
         }
