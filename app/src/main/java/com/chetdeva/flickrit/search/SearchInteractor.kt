@@ -139,7 +139,6 @@ class SearchInteractor(
         }
 
     companion object {
-        const val VISIBLE_THRESHOLD: Int = 9
         const val DEFAULT_SEARCH_QUERY: String = "kittens"
         const val MAX_PAGE_SIZE: Int = 12
         const val TOO_SMALL_QUERY_ERROR = "Type at least 3 characters"

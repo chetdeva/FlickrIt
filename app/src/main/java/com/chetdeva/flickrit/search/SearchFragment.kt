@@ -17,9 +17,9 @@ import com.chetdeva.flickrit.search.SearchInteractor.Companion.DEFAULT_SEARCH_QU
 import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
+import com.chetdeva.flickrit.util.recyclerview.OnScrollBelowItemsListener
 import com.chetdeva.flickrit.util.extension.*
 import com.chetdeva.flickrit.util.imagefetcher.ImageFetcher
-import com.chetdeva.flickrit.util.recyclerview.InfiniteScrollListener
 
 
 class SearchFragment : Fragment(), SearchContract.View {
@@ -31,7 +31,7 @@ class SearchFragment : Fragment(), SearchContract.View {
     private var searchView: SearchView? = null
     private lateinit var imageFetcher: ImageFetcher
 
-    private var infiniteScrollListener: InfiniteScrollListener? = null
+    private var scrollListener: OnScrollBelowItemsListener? = null
 
     /**
      * helper to calculate number of spans in a Grid based on a [RecyclerView] viewType
@@ -130,7 +130,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         results.setHasFixedSize(true)
         adapter = SearchResultsAdapter(presenter, imageFetcher)
         results.adapter = adapter
-        addScrollCallback(layoutManager, VISIBLE_THRESHOLD)
+        addScrollCallback()
     }
 
     private fun gridLayoutManager(): GridLayoutManager {
@@ -140,13 +140,13 @@ class SearchFragment : Fragment(), SearchContract.View {
         return layoutManager
     }
 
-    private fun addScrollCallback(gridLayoutManager: GridLayoutManager, visibleThreshold: Int) {
-        infiniteScrollListener = object : InfiniteScrollListener(gridLayoutManager, visibleThreshold) {
-            override fun onLoadMore() {
+    private fun addScrollCallback() {
+        scrollListener = object : OnScrollBelowItemsListener() {
+            override fun onScrolledDown(recyclerView: RecyclerView?) {
                 presenter.loadNextPage()
             }
         }
-        results.addOnScrollListener(infiniteScrollListener)
+        results.addOnScrollListener(scrollListener)
     }
 
     /**
@@ -287,7 +287,7 @@ class SearchFragment : Fragment(), SearchContract.View {
         super.onDestroy()
         imageFetcher.closeCache()
         onQueryTextListener = null
-        infiniteScrollListener = null
+        scrollListener = null
     }
 
     companion object {
