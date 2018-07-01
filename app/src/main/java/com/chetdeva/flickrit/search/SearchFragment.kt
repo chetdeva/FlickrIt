@@ -14,7 +14,6 @@ import com.chetdeva.flickrit.Injection
 import com.chetdeva.flickrit.R
 import com.chetdeva.flickrit.network.dto.PhotoDto
 import com.chetdeva.flickrit.search.SearchInteractor.Companion.DEFAULT_SEARCH_QUERY
-import com.chetdeva.flickrit.search.SearchInteractor.Companion.VISIBLE_THRESHOLD
 import com.chetdeva.flickrit.search.adapter.ProgressViewHolder
 import com.chetdeva.flickrit.search.adapter.SearchResultsAdapter
 import com.chetdeva.flickrit.util.recyclerview.OnScrollBelowItemsListener
