@@ -24,16 +24,27 @@ class PhotoViewHolder(itemView: View,
         get() = itemView.findViewById(R.id.image)
 
     fun bind(photo: PhotoDto) {
-        // set title
+        setTitle(photo)
+        setImage(photo)
+    }
+
+    private fun setTitle(photo: PhotoDto) {
         if (photo.title.isNotBlank()) {
             title.visible()
             title.text = photo.title
         } else {
             title.gone()
         }
-        // set image
-        if (photo.url.isNotBlank()) {
-            imageFetcher.loadImage(photo.url, image)
+    }
+
+    private fun setImage(photo: PhotoDto) {
+        if (photo.url.isNotBlank() && photo.url.startsWith("http")) {
+            try {
+                imageFetcher.loadImage(photo.url, image)
+            } catch (e: Exception) {
+                image.setImageResource(R.drawable.ic_placeholder)
+                e.printStackTrace()
+            }
         } else {
             image.setImageResource(R.drawable.ic_placeholder)
         }
