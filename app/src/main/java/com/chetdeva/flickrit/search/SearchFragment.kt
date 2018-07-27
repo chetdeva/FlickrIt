@@ -92,20 +92,18 @@ class SearchFragment : Fragment(), SearchContract.View {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
         outState.putString(LAST_SEARCH_QUERY, presenter.lastQuery)
+        super.onSaveInstanceState(outState)
     }
 
     private fun setupImageFetcher() {
         imageFetcher = Injection.provideFlickrImageFetcher(activity!!)
     }
 
-    private fun setupView(view: View) {
-        with(view) {
-            refreshLayout = findViewById(R.id.refresh_layout)
-            results = findViewById(R.id.results)
-            searching = findViewById(R.id.searching)
-        }
+    private fun setupView(view: View) = with(view) {
+        refreshLayout = findViewById(R.id.refresh_layout)
+        results = findViewById(R.id.results)
+        searching = findViewById(R.id.searching)
     }
 
     /**
@@ -179,72 +177,47 @@ class SearchFragment : Fragment(), SearchContract.View {
         }
     }
 
-    /**
-     * show loader on the screen
-     */
     private fun showScreenLoader() {
         searching.visible()
     }
 
-    /**
-     * hide loader from the screen
-     */
     private fun hideScreenLoaderIfShown() {
         if (searching.isVisible) {
             searching.gone()
         }
     }
 
-    /**
-     * hide keyboard from the screen
-     */
     private fun hideKeyboard() {
         if (searchView?.hasFocus() == true) searchView?.clearFocus()
     }
 
-    /**
-     * clear the [PhotoDto] list
-     */
     private fun clearList() {
         showList(emptyList())
     }
 
-    /**
-     * show loader at the bottom of the [PhotoDto] list and update it
-     */
     private fun showLoaderAndUpdate(photos: List<PhotoDto?>) {
         if (photos.isNotEmpty()) {
-            val list = photos.toMutableList()
-            list.add(null)
+            val list = photos.toMutableList().apply { add(null) }
             showList(list)
         } else {
             showList(photos)
         }
     }
 
-    /**
-     * submit [PhotoDto] list to [SearchResultsAdapter]. This calculates diff and reflects changes
-     */
     private fun showList(list: List<PhotoDto?>) {
         results.post { adapter.submitList(list) }
     }
 
-    /**
-     * hide loader from the bottom of the [PhotoDto] list and update it
-     */
     private fun hideLoaderAndUpdate(photos: List<PhotoDto?>) {
         showList(photos)
     }
 
-    fun hideSwipeRefreshIfShown() {
+    private fun hideSwipeRefreshIfShown() {
         if (refreshLayout.isRefreshing) {
             refreshLayout.isRefreshing = false
         }
     }
 
-    /**
-     * show error via Snackbar
-     */
     private fun showError(message: String) {
         results.showSnackbar(message)
     }

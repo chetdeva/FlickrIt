@@ -29,7 +29,7 @@ class SearchInteractorTest {
     private lateinit var interactor: SearchContract.Interactor
 
     @Mock
-    lateinit var apiService: FlickrApiService
+    private lateinit var apiService: FlickrApiService
     @Mock
     private lateinit var mapper: Mapper<SearchResponse, SearchResultDto>
     @Mock
